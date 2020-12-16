@@ -1,0 +1,23 @@
+declare const _default: {
+    readonly undef: (x: any) => x is undefined;
+    readonly null: (x: any) => x is null;
+    readonly un: (x: any) => x is null;
+    readonly bool: (x: any) => x is boolean;
+    readonly false: (x: any) => x is boolean;
+    readonly true: (x: any) => x is boolean;
+    readonly num: (x: any) => x is number;
+    readonly int: (x: any) => x is number;
+    readonly real: (x: any) => x is number;
+    readonly fin: (x: any) => x is number;
+    readonly nan: (x: any) => x is number;
+    readonly str: (x: any) => x is string;
+    readonly sym: (x: any) => x is symbol;
+    readonly func: (x: any) => x is Function;
+    readonly type: (x: any) => x is Function;
+    readonly obj: (x: any) => x is object;
+    readonly iter: (x: any) => any;
+    readonly arr: (x: any) => x is any[];
+    readonly set: (x: any) => x is Set<any>;
+    readonly map: (x: any) => x is Map<any, any>;
+};
+export default _default;

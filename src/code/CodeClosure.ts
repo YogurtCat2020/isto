@@ -3,7 +3,7 @@ import Code from './Code'
 
 
 export default class CodeClosure extends Code {
-  public constructor(args: {template: string, codes: any}) {
+  public constructor(args: {template: string, code: any}) {
     const {template, T, codes, code, C, ...rem} = <any> sugar(args, {
       template: 'T',
       code: 'C'

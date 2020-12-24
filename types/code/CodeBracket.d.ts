@@ -1,7 +1,7 @@
 import Code from './Code';
 export default abstract class CodeBracket extends Code {
     protected constructor(args: {
-        codes: any;
+        code: any;
     }, bracket: string);
 }
 export declare class CodeBracketRound extends CodeBracket {

@@ -6,8 +6,8 @@ export default abstract class Decor {
     return this._new(...to.obj(args))
   }
   protected static _new(...args: any[]): Decor {
-    if(args.length<=0) return decorNull
-    else if(args.length==1) {
+    if(args.length <= 0) return decorNull
+    else if(args.length == 1) {
       let [arg] = args
       if(arg instanceof Decor) return arg
       if(is.un(arg)) return decorNull

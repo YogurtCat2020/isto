@@ -7,7 +7,7 @@ This code library is based on TypeScript and includes type judgment, type transf
 ## Installation
 
 ```sh
-npm i -S @yogurtcat/lib@1.0.1
+npm i -S @yogurtcat/lib
 ```
 
 ## Usage
@@ -23,7 +23,7 @@ externals: {
 Import modules by adding tags in index.html
 
 ```HTML
-<script src="https://cdn.jsdelivr.net/npm/@yogurtcat/lib@1.0.1/dist/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@yogurtcat/lib@1.0.5/dist/index.min.js"></script>
 ```
 
 Import in TypeScript (or JavaScript)

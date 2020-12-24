@@ -36,19 +36,47 @@ export default new (class {
   }
   public readonly str = (x?: any, ...args: any[]): string => {
     if(objHas(x, sym.str)) return x[sym.str](...args)
-    const _str = (x: any, n: number = 0): string => {
-      if(!is.obj(x)) return String(x)
+
+    const strToKey = (x: string): string => {
+      const r = x.match(/^[$A-Za-z_][$0-9A-Za-z_]*$/)
+      if(!is.un(r)) return x
+      return strToStr(x)
+    }
+    const strToStr = (x: string): string => {
+      let q: string
+      if(this.has(x, '\n')) {
+        q = '`'
+        x = x.replace('\\', '\\\\').replace('`', '\\`')
+      }
+      else if(!this.has(x, '\'')) q = '\''
+      else if(!this.has(x, '"')) q = '"'
+      else if(!this.has(x, '`')) q = '`'
+      else {
+        q = '\''
+        x = x.replace('\\', '\\\\').replace('\'', '\\\'')
+      }
+      return q+x+q
+    }
+    const objToStr = (x: object, n: number): string => {
       n += 1
       const ind_in = ' '.repeat(2*n)
       const ind_out = ' '.repeat(2*(n-1))
       if(is.arr(x)) return '['+x
-        .map(i => '\n'+ind_in+_str(i, n))
+        .map(i => '\n'+ind_in+toStr(i, n))
         .join(',')+'\n'+ind_out+']'
       return '{'+this.arr(x)
-        .map(([k, v]) => '\n'+ind_in+_str(k)+': '+_str(v, n))
+        .map(([k, v]) => '\n'+ind_in+strToKey(k)+': '+toStr(v, n))
         .join(',')+'\n'+ind_out+'}'
     }
-    return _str(this.obj(x), ...args)
+    const toStr = (x: any, n: number): string => {
+      if(is.str(x)) return strToStr(x)
+      if(is.obj(x)) return objToStr(x, n)
+      return String(x)
+    }
+
+    let [n] = args
+    if(is.un(n)) n = 0
+    return toStr(this.obj(x), n)
   }
 
   public readonly bool = (x?: any): boolean => {
@@ -75,7 +103,6 @@ export default new (class {
     }
     return null
   }
-
   public readonly has = (x: any, i:any): boolean => {
     if(objHas(x, sym.has)) return x[sym.has](i)
     if(is.str(x)) {

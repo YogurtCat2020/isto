@@ -27,7 +27,7 @@ export default abstract class Mass extends Container<any, any> {
     if(!to.bool(key)) return [this, null]
     let curr = this
     let i = 0
-    for(; i<key.length-1; i++) {
+    for(; i < key.length-1; i++) {
       let k = key[i]
       k = curr.init(k)
       let next = curr._get(k)

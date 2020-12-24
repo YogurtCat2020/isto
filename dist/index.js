@@ -1,6 +1,7 @@
 /*!
- * @yogurtcat/lib.js v1.0.1
+ * @yogurtcat/lib.js v1.0.5
  * (c) 2020- YogurtCat
+ * git: https://github.com/YogurtCat2020/lib
  * Released under the MIT License.
  */
 (function webpackUniversalModuleDefinition(root, factory) {
@@ -18,7 +19,7 @@ return /******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
 /***/ "./src/Decor.ts":
-/*!**********************!*
+/*!**********************!*\
   !*** ./src/Decor.ts ***!
   \**********************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -131,7 +132,7 @@ const decorNull = new DecorNull();
 /***/ }),
 
 /***/ "./src/base/asrt.ts":
-/*!**************************!*
+/*!**************************!*\
   !*** ./src/base/asrt.ts ***!
   \**************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -154,7 +155,7 @@ exports.default = default_1;
 /***/ }),
 
 /***/ "./src/base/err.ts":
-/*!*************************!*
+/*!*************************!*\
   !*** ./src/base/err.ts ***!
   \*************************/
 /***/ ((__unused_webpack_module, exports) => {
@@ -173,7 +174,7 @@ exports.default = new (class {
 /***/ }),
 
 /***/ "./src/base/has.ts":
-/*!*************************!*
+/*!*************************!*\
   !*** ./src/base/has.ts ***!
   \*************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -199,7 +200,7 @@ exports.objHas = objHas;
 /***/ }),
 
 /***/ "./src/base/index.ts":
-/*!***************************!*
+/*!***************************!*\
   !*** ./src/base/index.ts ***!
   \***************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -236,7 +237,7 @@ Object.defineProperty(exports, "asrt", ({ enumerable: true, get: function () { r
 /***/ }),
 
 /***/ "./src/base/init.ts":
-/*!**************************!*
+/*!**************************!*\
   !*** ./src/base/init.ts ***!
   \**************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -264,7 +265,7 @@ exports.default = new (class {
 /***/ }),
 
 /***/ "./src/base/is.ts":
-/*!************************!*
+/*!************************!*\
   !*** ./src/base/is.ts ***!
   \************************/
 /***/ ((__unused_webpack_module, exports) => {
@@ -340,7 +341,7 @@ exports.default = new (class {
 /***/ }),
 
 /***/ "./src/base/join.ts":
-/*!**************************!*
+/*!**************************!*\
   !*** ./src/base/join.ts ***!
   \**************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -360,7 +361,7 @@ exports.default = default_1;
 /***/ }),
 
 /***/ "./src/base/map.ts":
-/*!*************************!*
+/*!*************************!*\
   !*** ./src/base/map.ts ***!
   \*************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -378,7 +379,7 @@ exports.default = default_1;
 /***/ }),
 
 /***/ "./src/base/split.ts":
-/*!***************************!*
+/*!***************************!*\
   !*** ./src/base/split.ts ***!
   \***************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -416,7 +417,7 @@ function default_1(str) {
             p = i;
     }
     if (!is_1.default.un(p))
-        r.push(str.slice(p));
+        r.push(str.slice(p, str.length));
     return r;
 }
 exports.default = default_1;
@@ -425,7 +426,7 @@ exports.default = default_1;
 /***/ }),
 
 /***/ "./src/base/sugar.ts":
-/*!***************************!*
+/*!***************************!*\
   !*** ./src/base/sugar.ts ***!
   \***************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -447,7 +448,7 @@ exports.default = default_1;
 /***/ }),
 
 /***/ "./src/base/sym.ts":
-/*!*************************!*
+/*!*************************!*\
   !*** ./src/base/sym.ts ***!
   \*************************/
 /***/ ((__unused_webpack_module, exports) => {
@@ -470,7 +471,7 @@ exports.default = new (class {
 /***/ }),
 
 /***/ "./src/base/to.ts":
-/*!************************!*
+/*!************************!*\
   !*** ./src/base/to.ts ***!
   \************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -524,21 +525,53 @@ exports.default = new (class {
         this.str = (x, ...args) => {
             if (has_1.objHas(x, sym_1.default.str))
                 return x[sym_1.default.str](...args);
-            const _str = (x, n = 0) => {
-                if (!is_1.default.obj(x))
-                    return String(x);
+            const strToKey = (x) => {
+                const r = x.match(/^[$A-Za-z_][$0-9A-Za-z_]*$/);
+                if (!is_1.default.un(r))
+                    return x;
+                return strToStr(x);
+            };
+            const strToStr = (x) => {
+                let q;
+                if (this.has(x, '\n')) {
+                    q = '`';
+                    x = x.replace('\\', '\\\\').replace('`', '\\`');
+                }
+                else if (!this.has(x, '\''))
+                    q = '\'';
+                else if (!this.has(x, '"'))
+                    q = '"';
+                else if (!this.has(x, '`'))
+                    q = '`';
+                else {
+                    q = '\'';
+                    x = x.replace('\\', '\\\\').replace('\'', '\\\'');
+                }
+                return q + x + q;
+            };
+            const objToStr = (x, n) => {
                 n += 1;
                 const ind_in = ' '.repeat(2 * n);
                 const ind_out = ' '.repeat(2 * (n - 1));
                 if (is_1.default.arr(x))
                     return '[' + x
-                        .map(i => '\n' + ind_in + _str(i, n))
+                        .map(i => '\n' + ind_in + toStr(i, n))
                         .join(',') + '\n' + ind_out + ']';
                 return '{' + this.arr(x)
-                    .map(([k, v]) => '\n' + ind_in + _str(k) + ': ' + _str(v, n))
+                    .map(([k, v]) => '\n' + ind_in + strToKey(k) + ': ' + toStr(v, n))
                     .join(',') + '\n' + ind_out + '}';
             };
-            return _str(this.obj(x), ...args);
+            const toStr = (x, n) => {
+                if (is_1.default.str(x))
+                    return strToStr(x);
+                if (is_1.default.obj(x))
+                    return objToStr(x, n);
+                return String(x);
+            };
+            let [n] = args;
+            if (is_1.default.un(n))
+                n = 0;
+            return toStr(this.obj(x), n);
         };
         this.bool = (x) => {
             if (has_1.objHas(x, sym_1.default.bool))
@@ -655,7 +688,7 @@ exports.default = new (class {
 /***/ }),
 
 /***/ "./src/code/Code.ts":
-/*!**************************!*
+/*!**************************!*\
   !*** ./src/code/Code.ts ***!
   \**************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
@@ -768,7 +801,7 @@ const codeNull = new CodeNull();
 /***/ }),
 
 /***/ "./src/code/CodeBracket.ts":
-/*!*********************************!*
+/*!*********************************!*\
   !*** ./src/code/CodeBracket.ts ***!
   \*********************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
@@ -793,9 +826,9 @@ class CodeBracket extends Code_1.default {
     constructor(args, bracket) {
         const _a = base_1.sugar(args, {
             template: 'T',
-            codes: 'C'
-        }), { template, T, codes, C } = _a, rem = __rest(_a, ["template", "T", "codes", "C"]);
-        super(Code_1.default.new(Object.assign({ template: bracket, codes: [codes] }, rem)).code);
+            code: 'C'
+        }), { template, T, codes, code, C } = _a, rem = __rest(_a, ["template", "T", "codes", "code", "C"]);
+        super(Code_1.default.new(Object.assign({ template: bracket, codes: [code] }, rem)).code);
     }
 }
 exports.default = CodeBracket;
@@ -825,7 +858,7 @@ Code_1.default.extension.set('{}', x => new CodeBracketCurly(x));
 /***/ }),
 
 /***/ "./src/code/CodeClosure.ts":
-/*!*********************************!*
+/*!*********************************!*\
   !*** ./src/code/CodeClosure.ts ***!
   \*********************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
@@ -862,7 +895,7 @@ Code_1.default.extension.set('C', x => new CodeClosure(x));
 /***/ }),
 
 /***/ "./src/code/CodeContainer.ts":
-/*!***********************************!*
+/*!***********************************!*\
   !*** ./src/code/CodeContainer.ts ***!
   \***********************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -938,7 +971,7 @@ Code_1.default.extension.set('O', x => new CodeObj(x));
 /***/ }),
 
 /***/ "./src/code/CodeVar.ts":
-/*!*****************************!*
+/*!*****************************!*\
   !*** ./src/code/CodeVar.ts ***!
   \*****************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
@@ -999,7 +1032,7 @@ Code_1.default.extension.set('V', x => new CodeVar(x));
 /***/ }),
 
 /***/ "./src/code/index.ts":
-/*!***************************!*
+/*!***************************!*\
   !*** ./src/code/index.ts ***!
   \***************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -1031,7 +1064,7 @@ Object.defineProperty(exports, "CodeObj", ({ enumerable: true, get: function () 
 /***/ }),
 
 /***/ "./src/container/Container.ts":
-/*!************************************!*
+/*!************************************!*\
   !*** ./src/container/Container.ts ***!
   \************************************/
 /***/ (function(__unused_webpack_module, exports, __webpack_require__) {
@@ -1211,7 +1244,7 @@ exports.default = Container;
 /***/ }),
 
 /***/ "./src/container/Dict.ts":
-/*!*******************************!*
+/*!*******************************!*\
   !*** ./src/container/Dict.ts ***!
   \*******************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -1244,7 +1277,7 @@ exports.default = Dict;
 /***/ }),
 
 /***/ "./src/container/List.ts":
-/*!*******************************!*
+/*!*******************************!*\
   !*** ./src/container/List.ts ***!
   \*******************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -1299,7 +1332,7 @@ exports.default = List;
 /***/ }),
 
 /***/ "./src/container/Mass.ts":
-/*!*******************************!*
+/*!*******************************!*\
   !*** ./src/container/Mass.ts ***!
   \*******************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -1435,7 +1468,7 @@ class MassConstructor extends Mass {
 /***/ }),
 
 /***/ "./src/container/index.ts":
-/*!********************************!*
+/*!********************************!*\
   !*** ./src/container/index.ts ***!
   \********************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -1456,7 +1489,7 @@ Object.defineProperty(exports, "Mass", ({ enumerable: true, get: function () { r
 /***/ }),
 
 /***/ "./src/evaluate.ts":
-/*!*************************!*
+/*!*************************!*\
   !*** ./src/evaluate.ts ***!
   \*************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -1522,7 +1555,7 @@ exports.default = default_1;
 /***/ }),
 
 /***/ "./src/index.ts":
-/*!**********************!*
+/*!**********************!*\
   !*** ./src/index.ts ***!
   \**********************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -1544,7 +1577,7 @@ Object.defineProperty(exports, "evaluate", ({ enumerable: true, get: function ()
 /***/ }),
 
 /***/ "./src/mixin/index.ts":
-/*!****************************!*
+/*!****************************!*\
   !*** ./src/mixin/index.ts ***!
   \****************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -1559,7 +1592,7 @@ Object.defineProperty(exports, "mount", ({ enumerable: true, get: function () { 
 /***/ }),
 
 /***/ "./src/mixin/mount.ts":
-/*!****************************!*
+/*!****************************!*\
   !*** ./src/mixin/mount.ts ***!
   \****************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
@@ -1581,7 +1614,7 @@ exports.default = default_1;
 /***/ }),
 
 /***/ "./src/util.ts":
-/*!*********************!*
+/*!*********************!*\
   !*** ./src/util.ts ***!
   \*********************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {

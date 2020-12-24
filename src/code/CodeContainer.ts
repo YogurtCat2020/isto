@@ -9,7 +9,7 @@ export default abstract class CodeContainer extends CodeVar {
     super(<any> args, init => ({
       template: initClosure,
       codes: [map(init, (v, k, i) => ({
-        template: initItem + (i+1<to.size(init)? `,`: ``),
+        template: initItem + (i+1 < to.size(init)? `,`: ``),
         codes: codeInitItem(v, k, i)
       }))]
     }))

@@ -9,8 +9,8 @@ export default abstract class Code {
     return this._new(...to.obj(args))
   }
   protected static _new(...args: any[]): Code {
-    if(args.length<=0) return codeNull
-    else if(args.length==1) {
+    if(args.length <= 0) return codeNull
+    else if(args.length == 1) {
       let [arg] = args
       if(arg instanceof Code) return arg
       if(is.un(arg)) return codeNull
@@ -80,7 +80,7 @@ class CodeTree extends Code {
     const templates = template.split(placeholder)
 
     const t = []
-    for(let i=0; i<templates.length-1; i++) {
+    for(let i = 0; i < templates.length-1; i++) {
       const code = codes[i]
       t.push(templates[i])
       t.push(code instanceof Code? code: Code._new(code))

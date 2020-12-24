@@ -3,15 +3,15 @@ import Code from './Code'
 
 
 export default abstract class CodeBracket extends Code {
-  protected constructor(args: {codes: any}, bracket: string) {
-    const {template, T, codes, C, ...rem} = <any> sugar(args, {
+  protected constructor(args: {code: any}, bracket: string) {
+    const {template, T, codes, code, C, ...rem} = <any> sugar(args, {
       template: 'T',
-      codes: 'C'
+      code: 'C'
     })
 
     super(Code.new({
       template: bracket,
-      codes: [codes],
+      codes: [code],
       ...rem
     }).code)
   }

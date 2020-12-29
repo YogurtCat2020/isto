@@ -1,6 +1,6 @@
 # YogurtCat-lib
 
-爱吃酸奶的喵的代码库。
+爱吃酸奶的猫的代码库。
 
 这个代码库是基于 TypeScript 开发的，包含类型判断、类型转化、装饰器类、混入对象、容器类、代码生成、杂项工具、代码解释等等。
 
@@ -23,7 +23,7 @@ externals: {
 在 index.html 中用标签引入模块
 
 ```HTML
-<script src="https://cdn.jsdelivr.net/npm/@yogurtcat/lib@1.0.5/dist/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@yogurtcat/lib@1.0.6/dist/index.min.js"></script>
 ```
 
 在 TypeScript（或 JavaScript）中导入

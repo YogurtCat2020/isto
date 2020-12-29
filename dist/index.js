@@ -1,5 +1,5 @@
 /*!
- * @yogurtcat/lib.js v1.0.5
+ * @yogurtcat/lib.js v1.0.6
  * (c) 2020- YogurtCat
  * git: https://github.com/YogurtCat2020/lib
  * Released under the MIT License.
@@ -408,12 +408,12 @@ function default_1(str) {
             p = i;
         }
         else if (!is_1.default.un(p)) {
-            if (c === ' ') {
+            if (to_1.default.has(' \n', c)) {
                 r.push(str.slice(p, i));
                 p = null;
             }
         }
-        else if (c !== ' ')
+        else if (!to_1.default.has(' \n', c))
             p = i;
     }
     if (!is_1.default.un(p))

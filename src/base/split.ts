@@ -19,11 +19,11 @@ export default function(str: string): string[] {
       q = c
       p = i
     } else if(!is.un(p)) {
-      if(c === ' ') {
+      if(to.has(' \n', c)) {
         r.push(str.slice(p, i))
         p = null
       }
-    } else if(c !== ' ') p = i
+    } else if(!to.has(' \n', c)) p = i
   }
   if(!is.un(p)) r.push(str.slice(p, str.length))
   return r

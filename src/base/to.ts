@@ -46,14 +46,14 @@ export default new (class {
       let q: string
       if(this.has(x, '\n')) {
         q = '`'
-        x = x.replace('\\', '\\\\').replace('`', '\\`')
+        x = x.replace(/\\/g, '\\\\').replace(/`/g, '\\`')
       }
-      else if(!this.has(x, '\'')) q = '\''
+      else if(!this.has(x, "'")) q = "'"
       else if(!this.has(x, '"')) q = '"'
       else if(!this.has(x, '`')) q = '`'
       else {
-        q = '\''
-        x = x.replace('\\', '\\\\').replace('\'', '\\\'')
+        q = "'"
+        x = x.replace(/\\/g, '\\\\').replace(/'/g, "\\'")
       }
       return q+x+q
     }

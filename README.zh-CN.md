@@ -23,7 +23,7 @@ externals: {
 在 index.html 中用标签引入模块
 
 ```HTML
-<script src="https://cdn.jsdelivr.net/npm/@yogurtcat/lib@1.0.6/dist/index.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@yogurtcat/lib@1.0.10/dist/index.min.js"></script>
 ```
 
 在 TypeScript（或 JavaScript）中导入

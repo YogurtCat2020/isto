@@ -1,5 +1,5 @@
 /*!
- * @yogurtcat/lib.js v1.0.6
+ * @yogurtcat/lib.js v1.0.10
  * (c) 2020- YogurtCat
  * git: https://github.com/YogurtCat2020/lib
  * Released under the MIT License.
@@ -535,17 +535,17 @@ exports.default = new (class {
                 let q;
                 if (this.has(x, '\n')) {
                     q = '`';
-                    x = x.replace('\\', '\\\\').replace('`', '\\`');
+                    x = x.replace(/\\/g, '\\\\').replace(/`/g, '\\`');
                 }
-                else if (!this.has(x, '\''))
-                    q = '\'';
+                else if (!this.has(x, "'"))
+                    q = "'";
                 else if (!this.has(x, '"'))
                     q = '"';
                 else if (!this.has(x, '`'))
                     q = '`';
                 else {
-                    q = '\'';
-                    x = x.replace('\\', '\\\\').replace('\'', '\\\'');
+                    q = "'";
+                    x = x.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
                 }
                 return q + x + q;
             };

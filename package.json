@@ -1,11 +1,14 @@
 {
+  "author": "YogurtCat",
   "name": "@yogurtcat/lib",
-  "version": "1.0.10",
+  "version": "1.1.0",
   "description": "YogurtCat's code library.",
+  "keywords": [],
   "repository": {
     "type": "git",
     "url": "https://github.com/YogurtCat2020/lib"
   },
+  "license": "MIT",
   "main": "dist/index.js",
   "types": "types/index.d.ts",
   "files": [
@@ -13,12 +16,9 @@
     "types"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "dev": "webpack -w",
+    "build": "webpack"
   },
-  "keywords": [
-  ],
-  "author": "YogurtCat",
-  "license": "MIT",
   "devDependencies": {
     "ts-loader": "^8.0.11",
     "typescript": "^4.1.2",

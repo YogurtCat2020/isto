@@ -1,6 +1,6 @@
 import is from './is'
 import sym from './sym'
-import {objHas} from './has'
+import {objHas} from './util'
 
 
 export default new (class {

@@ -13,10 +13,9 @@ export default class CodeClosure extends Code {
       template: template,
       codes: [code],
       ...rem
-    }).code)
+    }).$)
   }
 }
-
 
 Code.extension.set('closure', x => new CodeClosure(x))
 Code.extension.set('C', x => new CodeClosure(x))

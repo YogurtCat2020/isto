@@ -28,5 +28,5 @@ export default abstract class Container<K, V> {
     splice(key: K, num: number, ...vals: V[]): V[];
     protected _merge(args: object): void;
     merge(args: any): Container<K, V>;
-    $(...args: any[]): Container<K, V>;
+    decor(...args: any[]): Container<K, V>;
 }

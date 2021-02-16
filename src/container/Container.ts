@@ -1,8 +1,7 @@
 import {is, to, sym, err} from '../base'
-import {mount} from '../mixin'
+import Decor from '../Decor'
 
 
-@mount('$')
 export default abstract class Container<K, V> {
   protected readonly container: any
 
@@ -141,7 +140,6 @@ export default abstract class Container<K, V> {
   protected _splice(key: K, num: number, ...vals: V[]): V[] {
     return err.notImplemented()
   }
-
   public splice(key: K, num: number, ...vals: V[]): V[] {
     const [c, k] = this.relocate(key)
     const vs = vals.map(i => this.reg(i))
@@ -152,14 +150,13 @@ export default abstract class Container<K, V> {
   protected _merge(args: object): void {
     err.notImplemented()
   }
-
   public merge(args: any): Container<K, V> {
     args = to.obj(args)
     this._merge(args)
     return this
   }
 
-  public $(...args: any[]): Container<K, V> {
-    return err.notImplemented()
+  public decor(...args: any[]): Container<K, V> {
+    return Decor.new(...args).$(this)
   }
 }

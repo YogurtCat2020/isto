@@ -1,4 +1,4 @@
-import {is, to, sym, sugar, err} from './base'
+import {is, to, sym, decor, decorator, err, sugar} from './base'
 
 
 export default abstract class Decor {
@@ -24,8 +24,19 @@ export default abstract class Decor {
     return err.notImplemented()
   }
 
-  public decor<T>(x: T): T {
+  public $(x: any): any {
     return err.notImplemented()
+  }
+
+  public static decor(name: string): any {
+    return (cls: any): any => {
+      const func = function(...args: any[]): any {
+        return Decor.new(...args).$(this)
+      }
+      const meth =  decor.cls.newMeth(func)
+      decor.cls.setMeth(cls, name, meth)
+      return cls
+    }
   }
 }
 
@@ -38,14 +49,14 @@ class DecorNull extends Decor {
     return false
   }
 
-  public decor<T>(x: T): T {
+  public $(x: any): any {
     return x
   }
 }
 class DecorAtom extends Decor {
-  private readonly func: <T>(x: T) => T
+  private readonly func: decorator
 
-  public constructor(func: <T>(x: T) => T) {
+  public constructor(func: decorator) {
     super()
     this.func = func
   }
@@ -54,7 +65,7 @@ class DecorAtom extends Decor {
     return true
   }
 
-  public decor<T>(x: T): T {
+  public $(x: any): any {
     const r = this.func(x)
     if(is.un(r)) return x
     return r
@@ -72,8 +83,8 @@ class DecorChain extends Decor {
     return to.bool(this.decors)
   }
 
-  public decor<T>(x: T): T {
-    for(const decor of this.decors) x = decor.decor(x)
+  public $(x: any): any {
+    for(const decor of this.decors) x = decor.$(x)
     return x
   }
 }
@@ -97,10 +108,10 @@ class DecorTree extends Decor {
     return to.bool(this.before) || to.bool(this.after) || to.bool(this.decors)
   }
 
-  public decor<T>(x: T): T {
-    x = this.before.decor(x)
-    if(!is.un(this.decors)) x = this.decors.decor(x)
-    x = this.after.decor(x)
+  public $(x: any): any {
+    x = this.before.$(x)
+    if(!is.un(this.decors)) x = this.decors.$(x)
+    x = this.after.$(x)
     return x
   }
 

@@ -1,35 +1,37 @@
-
-const _path = require('path')
-const _dir = __dirname
-const path = str => _path.resolve(_dir, str)
-
-const config = require(path('config.js'))
-
-webpack = require('webpack')
-TerserPlugin = require('terser-webpack-plugin')
-
-const webpackConfig = require(path('webpackConfig.js'))
+const webpack = require('webpack')
+const TerserPlugin = require('terser-webpack-plugin')
+const {path, configWebpack} = require('../util')
+const config = {
+  author: 'YogurtCat',
+  date: '2020-',
+  name: '@yogurtcat/lib',
+  version: '1.1.0',
+  repository: {
+    git: 'https://github.com/YogurtCat2020/lib'
+  }
+}
 
 
 module.exports = [
-  webpackConfig({
-    path,
+  configWebpack({
+    path: path(__dirname),
     config,
     webpack,
     TerserPlugin,
     entry: 'src/index.ts',
     filename: 'index.js',
-    min: false,
-    externals: config.externals
+    libraryTarget: 'commonjs2',
+    min: false
   }),
-  webpackConfig({
-    path,
+  configWebpack({
+    path: path(__dirname),
     config,
     webpack,
     TerserPlugin,
-    entry: 'src/index.min.ts',
+    entry: 'src/index.ts',
     filename: 'index.min.js',
-    min: true,
-    externals: config.externalsMin
+    libraryTarget: 'global',
+    library: '$yogurtcat$lib',
+    min: true
   })
 ]

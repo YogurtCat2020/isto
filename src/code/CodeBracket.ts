@@ -13,29 +13,25 @@ export default abstract class CodeBracket extends Code {
       template: bracket,
       codes: [code],
       ...rem
-    }).code)
+    }).$)
   }
 }
-
 
 export class CodeBracketRound extends CodeBracket {
   public constructor(args: object) {
     super(<any> args, `(@)`)
   }
 }
-
 export class CodeBracketSquare extends CodeBracket {
   public constructor(args: object) {
     super(<any> args, `[@]`)
   }
 }
-
 export class CodeBracketCurly extends CodeBracket {
   public constructor(args: object) {
     super(<any> args, `{@}`)
   }
 }
-
 
 Code.extension.set('()', x => new CodeBracketRound(x))
 Code.extension.set('[]', x => new CodeBracketSquare(x))

@@ -1,4 +1,4 @@
-import {is, to, sym, sugar, asrt} from '../base'
+import {is, to, sym, sugar, assert} from '../base'
 import {Dict} from '../container'
 
 
@@ -30,7 +30,7 @@ export default abstract class Code {
     } else return new CodeChain(args)
   }
 
-  public readonly code: string
+  private readonly code: string
 
   protected constructor(code: string) {
     this.code = code
@@ -47,6 +47,10 @@ export default abstract class Code {
   }
 
   public toString(): string {
+    return this.code
+  }
+
+  public get $(): string {
     return this.code
   }
 }
@@ -75,7 +79,7 @@ class CodeTree extends Code {
     })
 
     if(is.un(placeholder)) placeholder = '@'
-    asrt(to.bool(placeholder), 'placeholder不能为空字符串！')
+    assert(to.bool(placeholder), 'placeholder不能为空字符串！')
 
     const templates = template.split(placeholder)
 

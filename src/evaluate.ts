@@ -1,114 +1,88 @@
-import {
-  is as _is,
-  to as _to,
-  sym as _sym,
-  map as _map,
-  join as _join,
-  split as _split,
-  has as _has,
-  funcHas as _funcHas,
-  objHas as _objHas,
-  init as _init,
-  sugar as _sugar,
-  err as _err,
-  asrt as _asrt,
-} from './base'
-import {
-  Container as _Container,
-  List as _List,
-  Dict as _Dict,
-  Mass as _Mass,
-} from './container'
-import {
-  mount as _mount,
-} from './mixin'
-import {
-  Code as _Code,
-  CodeClosure as _CodeClosure,
-  CodeBracket as _CodeBracket,
-  CodeBracketRound as _CodeBracketRound,
-  CodeBracketSquare as _CodeBracketSquare,
-  CodeBracketCurly as _CodeBracketCurly,
-  CodeVar as _CodeVar,
-  CodeContainer as _CodeContainer,
-  CodeList as _CodeList,
-  CodeDict as _CodeDict,
-  CodeSet as _CodeSet,
-  CodeArr as _CodeArr,
-  CodeMap as _CodeMap,
-  CodeObj as _CodeObj,
-} from './code'
+import * as base from './base'
+import * as container from './container'
+import * as code from './code'
 import _Decor from './Decor'
-import {
-  print as _print,
-  printObj as _printObj,
-  printLine as _printLine,
-} from './util'
 
 
-const is = _is
-const to = _to
-const sym = _sym
-const map = _map
-const join = _join
-const split = _split
-const has = _has
-const funcHas = _funcHas
-const objHas = _objHas
-const init = _init
-const sugar = _sugar
-const err = _err
-const asrt = _asrt
+const is = base.is
+const to = base.to
+const sym = base.sym
+const init = base.init
+const str = base.str
+const arr = base.arr
+const decor = base.decor
+const print = base.print
+const err = base.err
+const has = base.has
+const funcHas = base.funcHas
+const objHas = base.objHas
+const map = base.map
+const join = base.join
+const split = base.split
+const line = base.line
+const sugar = base.sugar
+const assert = base.assert
 
-const Container = _Container
-const List = _List
-const Dict = _Dict
-const Mass = _Mass
+const Container = container.Container
+const List = container.List
+const Dict = container.Dict
+const Mass = container.Mass
 
-const mount = _mount
-
-const Code = _Code
-const CodeClosure = _CodeClosure
-const CodeBracket = _CodeBracket
-const CodeBracketRound = _CodeBracketRound
-const CodeBracketSquare = _CodeBracketSquare
-const CodeBracketCurly = _CodeBracketCurly
-const CodeVar = _CodeVar
-const CodeContainer = _CodeContainer
-const CodeList = _CodeList
-const CodeDict = _CodeDict
-const CodeSet = _CodeSet
-const CodeArr = _CodeArr
-const CodeMap = _CodeMap
-const CodeObj = _CodeObj
+const Code = code.Code
+const CodeClosure = code.CodeClosure
+const CodeBracket = code.CodeBracket
+const CodeBracketRound = code.CodeBracketRound
+const CodeBracketSquare = code.CodeBracketSquare
+const CodeBracketCurly = code.CodeBracketCurly
+const CodeVar = code.CodeVar
+const CodeContainer = code.CodeContainer
+const CodeObj = code.CodeObj
+const CodeArr = code.CodeArr
+const CodeSet = code.CodeSet
+const CodeMap = code.CodeMap
+const CodeList = code.CodeList
+const CodeDict = code.CodeDict
 
 const Decor = _Decor
 
-const print = _print
-const printObj = _printObj
-const printLine = _printLine
-
 
 export default function(code: any, context?: any, contextName?: string) {
-  code = Code.new(code).code
+  code = Code.new(code).$
   if(is.un(context)) return eval(code)
   if(is.un(contextName)) contextName = 'C'
   return eval(Code.new({
     template: `(@ => @)`,
     codes: [contextName, code]
-  }).code)(context)
+  }).$)(context)
 }
 
 
 /*
-const A = s => console.log(
-  s.split('\n').map(i => i.trim()).filter(i => i[i.length-1]===',')
-    .map(i => i.split(',')[0].trim()).map(i => `${i} as _${i},`)
-    .join('\n')
-)
-const B = s => console.log(
-  s.split('\n').map(i => i.trim()).filter(i => i[i.length-1]===',')
-    .map(i => i.split(' as ')[0].trim()).map(i => `const ${i} = _${i}`)
-    .join('\n')
-)
+let f = (m, s) => s
+  .split(/[, \n]+/)
+  .filter(i => Boolean(i))
+  .map(i => `const ${i} = ${m}.${i}`)
+  .join('\n')
+console.log([f('base', `is, to, sym, init,
+  str, arr,
+  decor,
+  print,
+  err,
+  has, funcHas, objHas,
+  map, join, split, line,
+  sugar,
+  assert`),
+  f('container', `Container,
+  List, Dict,
+  Mass`),
+  f('code', `Code,
+  CodeClosure,
+  CodeBracket,
+  CodeBracketRound, CodeBracketSquare, CodeBracketCurly,
+  CodeVar,
+  CodeContainer,
+  CodeObj, CodeArr,
+  CodeSet, CodeMap,
+  CodeList, CodeDict`),
+'const Decor = _Decor'].join('\n\n'))
 */

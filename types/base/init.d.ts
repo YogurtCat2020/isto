@@ -5,11 +5,11 @@ declare const _default: {
     readonly str: () => string;
     readonly sym: () => symbol;
     readonly func: () => () => void;
-    readonly obj: () => object;
+    readonly obj: () => {};
     readonly arr: <T>() => T[];
     readonly set: <T_2>() => Set<T_2>;
     readonly map: <K, V>() => Map<K, V>;
-    readonly list: <T_4>() => List<T_4>;
-    readonly dict: <K_2, V_2>() => Dict<K_2, V_2>;
+    readonly list: <T_3>() => List<T_3>;
+    readonly dict: <K_1, V_1>() => Dict<K_1, V_1>;
 };
 export default _default;

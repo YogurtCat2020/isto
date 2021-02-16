@@ -24,7 +24,7 @@ export default class CodeVar extends Code {
       template: '@',
       codes: [codeInit(init)],
       ...rem
-    }).code)
+    }).$)
     else super(Code.new({
       template: closure,
       codes: [{
@@ -38,10 +38,9 @@ export default class CodeVar extends Code {
         ]
       }],
       ...rem
-    }).code)
+    }).$)
   }
 }
-
 
 Code.extension.set('var', x => new CodeVar(x))
 Code.extension.set('V', x => new CodeVar(x))

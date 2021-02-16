@@ -1,20 +1,11 @@
 /*!
- * @yogurtcat/lib.js v1.0.10
+ * @yogurtcat/lib.js v1.1.0
  * (c) 2020- YogurtCat
  * git: https://github.com/YogurtCat2020/lib
  * Released under the MIT License.
  */
-(function webpackUniversalModuleDefinition(root, factory) {
-	if(typeof exports === 'object' && typeof module === 'object')
-		module.exports = factory();
-	else if(typeof define === 'function' && define.amd)
-		define([], factory);
-	else {
-		var a = factory();
-		for(var i in a) (typeof exports === 'object' ? exports : root)[i] = a[i];
-	}
-})(self, function() {
-return /******/ (() => { // webpackBootstrap
+module.exports =
+/******/ (() => { // webpackBootstrap
 /******/ 	"use strict";
 /******/ 	var __webpack_modules__ = ({
 
@@ -56,8 +47,18 @@ class Decor {
     [base_1.sym.bool]() {
         return base_1.err.notImplemented();
     }
-    decor(x) {
+    $(x) {
         return base_1.err.notImplemented();
+    }
+    static decor(name) {
+        return (cls) => {
+            const func = function (...args) {
+                return Decor.new(...args).$(this);
+            };
+            const meth = base_1.decor.cls.newMeth(func);
+            base_1.decor.cls.setMeth(cls, name, meth);
+            return cls;
+        };
     }
 }
 exports.default = Decor;
@@ -68,7 +69,7 @@ class DecorNull extends Decor {
     [base_1.sym.bool]() {
         return false;
     }
-    decor(x) {
+    $(x) {
         return x;
     }
 }
@@ -80,7 +81,7 @@ class DecorAtom extends Decor {
     [base_1.sym.bool]() {
         return true;
     }
-    decor(x) {
+    $(x) {
         const r = this.func(x);
         if (base_1.is.un(r))
             return x;
@@ -95,9 +96,9 @@ class DecorChain extends Decor {
     [base_1.sym.bool]() {
         return base_1.to.bool(this.decors);
     }
-    decor(x) {
+    $(x) {
         for (const decor of this.decors)
-            x = decor.decor(x);
+            x = decor.$(x);
         return x;
     }
 }
@@ -114,11 +115,11 @@ class DecorTree extends Decor {
     [base_1.sym.bool]() {
         return base_1.to.bool(this.before) || base_1.to.bool(this.after) || base_1.to.bool(this.decors);
     }
-    decor(x) {
-        x = this.before.decor(x);
+    $(x) {
+        x = this.before.$(x);
         if (!base_1.is.un(this.decors))
-            x = this.decors.decor(x);
-        x = this.after.decor(x);
+            x = this.decors.$(x);
+        x = this.after.$(x);
         return x;
     }
     up(...args) {
@@ -131,25 +132,101 @@ const decorNull = new DecorNull();
 
 /***/ }),
 
-/***/ "./src/base/asrt.ts":
-/*!**************************!*\
-  !*** ./src/base/asrt.ts ***!
-  \**************************/
+/***/ "./src/base/arr.ts":
+/*!*************************!*\
+  !*** ./src/base/arr.ts ***!
+  \*************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const is_1 = __webpack_require__(/*! ./is */ "./src/base/is.ts");
-const err_1 = __webpack_require__(/*! ./err */ "./src/base/err.ts");
-function default_1(cdt, msg) {
-    if (!cdt) {
-        if (is_1.default.un(msg))
-            err_1.default.assertionFail();
-        else
-            err_1.default.err(msg);
+exports.default = new (class {
+    constructor() {
+        this.last = (arr, item) => {
+            if (is_1.default.un(item))
+                return arr[arr.length - 1];
+            arr[arr.length - 1] = item;
+            return null;
+        };
+        this.appends = (arr, items) => {
+            arr.splice(arr.length, 0, ...items);
+        };
     }
-}
-exports.default = default_1;
+})();
+
+
+/***/ }),
+
+/***/ "./src/base/decor.ts":
+/*!***************************!*\
+  !*** ./src/base/decor.ts ***!
+  \***************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const is_1 = __webpack_require__(/*! ./is */ "./src/base/is.ts");
+exports.default = new (class {
+    constructor() {
+        this.$ = (x, ...funcs) => {
+            for (let func of funcs) {
+                if (is_1.default.un(func))
+                    continue;
+                let t = func(x);
+                if (!is_1.default.un(t))
+                    x = t;
+            }
+            return x;
+        };
+        this.obj = new (class {
+            constructor() {
+                this.add = (attr, val) => x => {
+                    if (is_1.default.un(x[attr])) {
+                        if (is_1.default.func(val))
+                            val = val();
+                        x[attr] = val;
+                    }
+                };
+                this.get = (attr) => x => x[attr];
+                this.set = (attr, val) => x => {
+                    x[attr] = val;
+                };
+            }
+        })();
+        this.cls = new (class {
+            constructor() {
+                this.hasMeth = (cls, name) => {
+                    return cls.prototype.hasOwnProperty(name);
+                };
+                this.newMeth = (func, args) => {
+                    let { writable, enumerable, configurable } = args || {};
+                    writable = writable || true;
+                    enumerable = enumerable || false;
+                    configurable = configurable || true;
+                    return {
+                        value: func,
+                        writable,
+                        enumerable,
+                        configurable
+                    };
+                };
+                this.setMeth = (cls, name, meth) => {
+                    Object.defineProperty(cls.prototype, name, meth);
+                };
+                this.applyParam = (decor, cls, name, indx) => {
+                    decor(cls.prototype, name, indx);
+                };
+                this.applyMeth = (decor, cls, name, meth) => {
+                    return decor(cls.prototype, name, meth) || meth;
+                };
+                this.applyClass = (decor, cls) => {
+                    return decor(cls) || cls;
+                };
+            }
+        })();
+    }
+})();
 
 
 /***/ }),
@@ -164,37 +241,11 @@ exports.default = default_1;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.default = new (class {
     constructor() {
-        this.err = (msg) => { throw `<err> ${msg} </err>`; };
-        this.notImplemented = () => this.err('not implemented !');
-        this.assertionFail = () => this.err('assertion fail !');
+        this.$ = (msg) => { throw `<err> ${msg} </err>`; };
+        this.notImplemented = () => this.$('not implemented');
+        this.assertionFail = () => this.$('assertion fail');
     }
 })();
-
-
-/***/ }),
-
-/***/ "./src/base/has.ts":
-/*!*************************!*\
-  !*** ./src/base/has.ts ***!
-  \*************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.objHas = exports.funcHas = void 0;
-const is_1 = __webpack_require__(/*! ./is */ "./src/base/is.ts");
-function default_1(x, a) {
-    return (is_1.default.func(x) || is_1.default.obj(x)) && a in x;
-}
-exports.default = default_1;
-function funcHas(x, a) {
-    return is_1.default.func(x) && a in x;
-}
-exports.funcHas = funcHas;
-function objHas(x, a) {
-    return is_1.default.obj(x) && a in x;
-}
-exports.objHas = objHas;
 
 
 /***/ }),
@@ -207,31 +258,35 @@ exports.objHas = objHas;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.asrt = exports.err = exports.sugar = exports.init = exports.objHas = exports.funcHas = exports.has = exports.split = exports.join = exports.map = exports.sym = exports.to = exports.is = void 0;
-var is_1 = __webpack_require__(/*! ./is */ "./src/base/is.ts");
-Object.defineProperty(exports, "is", ({ enumerable: true, get: function () { return is_1.default; } }));
-var to_1 = __webpack_require__(/*! ./to */ "./src/base/to.ts");
-Object.defineProperty(exports, "to", ({ enumerable: true, get: function () { return to_1.default; } }));
-var sym_1 = __webpack_require__(/*! ./sym */ "./src/base/sym.ts");
-Object.defineProperty(exports, "sym", ({ enumerable: true, get: function () { return sym_1.default; } }));
-var map_1 = __webpack_require__(/*! ./map */ "./src/base/map.ts");
-Object.defineProperty(exports, "map", ({ enumerable: true, get: function () { return map_1.default; } }));
-var join_1 = __webpack_require__(/*! ./join */ "./src/base/join.ts");
-Object.defineProperty(exports, "join", ({ enumerable: true, get: function () { return join_1.default; } }));
-var split_1 = __webpack_require__(/*! ./split */ "./src/base/split.ts");
-Object.defineProperty(exports, "split", ({ enumerable: true, get: function () { return split_1.default; } }));
-var has_1 = __webpack_require__(/*! ./has */ "./src/base/has.ts");
-Object.defineProperty(exports, "has", ({ enumerable: true, get: function () { return has_1.default; } }));
-Object.defineProperty(exports, "funcHas", ({ enumerable: true, get: function () { return has_1.funcHas; } }));
-Object.defineProperty(exports, "objHas", ({ enumerable: true, get: function () { return has_1.objHas; } }));
-var init_1 = __webpack_require__(/*! ./init */ "./src/base/init.ts");
-Object.defineProperty(exports, "init", ({ enumerable: true, get: function () { return init_1.default; } }));
-var sugar_1 = __webpack_require__(/*! ./sugar */ "./src/base/sugar.ts");
-Object.defineProperty(exports, "sugar", ({ enumerable: true, get: function () { return sugar_1.default; } }));
-var err_1 = __webpack_require__(/*! ./err */ "./src/base/err.ts");
-Object.defineProperty(exports, "err", ({ enumerable: true, get: function () { return err_1.default; } }));
-var asrt_1 = __webpack_require__(/*! ./asrt */ "./src/base/asrt.ts");
-Object.defineProperty(exports, "asrt", ({ enumerable: true, get: function () { return asrt_1.default; } }));
+exports.assert = exports.sugar = exports.line = exports.split = exports.join = exports.map = exports.objHas = exports.funcHas = exports.has = exports.err = exports.print = exports.decor = exports.arr = exports.str = exports.init = exports.sym = exports.to = exports.is = void 0;
+const is_1 = __webpack_require__(/*! ./is */ "./src/base/is.ts");
+exports.is = is_1.default;
+const to_1 = __webpack_require__(/*! ./to */ "./src/base/to.ts");
+exports.to = to_1.default;
+const sym_1 = __webpack_require__(/*! ./sym */ "./src/base/sym.ts");
+exports.sym = sym_1.default;
+const init_1 = __webpack_require__(/*! ./init */ "./src/base/init.ts");
+exports.init = init_1.default;
+const str_1 = __webpack_require__(/*! ./str */ "./src/base/str.ts");
+exports.str = str_1.default;
+const arr_1 = __webpack_require__(/*! ./arr */ "./src/base/arr.ts");
+exports.arr = arr_1.default;
+const decor_1 = __webpack_require__(/*! ./decor */ "./src/base/decor.ts");
+exports.decor = decor_1.default;
+const print_1 = __webpack_require__(/*! ./print */ "./src/base/print.ts");
+exports.print = print_1.default;
+const err_1 = __webpack_require__(/*! ./err */ "./src/base/err.ts");
+exports.err = err_1.default;
+const util_1 = __webpack_require__(/*! ./util */ "./src/base/util.ts");
+Object.defineProperty(exports, "has", ({ enumerable: true, get: function () { return util_1.has; } }));
+Object.defineProperty(exports, "funcHas", ({ enumerable: true, get: function () { return util_1.funcHas; } }));
+Object.defineProperty(exports, "objHas", ({ enumerable: true, get: function () { return util_1.objHas; } }));
+Object.defineProperty(exports, "map", ({ enumerable: true, get: function () { return util_1.map; } }));
+Object.defineProperty(exports, "join", ({ enumerable: true, get: function () { return util_1.join; } }));
+Object.defineProperty(exports, "split", ({ enumerable: true, get: function () { return util_1.split; } }));
+Object.defineProperty(exports, "line", ({ enumerable: true, get: function () { return util_1.line; } }));
+Object.defineProperty(exports, "sugar", ({ enumerable: true, get: function () { return util_1.sugar; } }));
+Object.defineProperty(exports, "assert", ({ enumerable: true, get: function () { return util_1.assert; } }));
 
 
 /***/ }),
@@ -340,109 +395,64 @@ exports.default = new (class {
 
 /***/ }),
 
-/***/ "./src/base/join.ts":
-/*!**************************!*\
-  !*** ./src/base/join.ts ***!
-  \**************************/
+/***/ "./src/base/print.ts":
+/*!***************************!*\
+  !*** ./src/base/print.ts ***!
+  \***************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const is_1 = __webpack_require__(/*! ./is */ "./src/base/is.ts");
 const to_1 = __webpack_require__(/*! ./to */ "./src/base/to.ts");
-function default_1(arr, sep) {
-    if (is_1.default.un(sep))
-        sep = '';
-    return [...to_1.default.iter(arr)].join(sep);
-}
-exports.default = default_1;
+const util_1 = __webpack_require__(/*! ./util */ "./src/base/util.ts");
+exports.default = new (class {
+    constructor() {
+        this.$ = (...args) => {
+            console.log(...args);
+        };
+        this.obj = (...args) => {
+            this.$(...args.map(i => to_1.default.str(i)));
+        };
+        this.line = (...args) => {
+            this.$(util_1.line(...args));
+        };
+    }
+})();
 
 
 /***/ }),
 
-/***/ "./src/base/map.ts":
+/***/ "./src/base/str.ts":
 /*!*************************!*\
-  !*** ./src/base/map.ts ***!
+  !*** ./src/base/str.ts ***!
   \*************************/
 /***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const to_1 = __webpack_require__(/*! ./to */ "./src/base/to.ts");
-function* default_1(x, func) {
-    for (const [v, k, i] of to_1.default.vki(x))
-        yield func(v, k, i);
-}
-exports.default = default_1;
-
-
-/***/ }),
-
-/***/ "./src/base/split.ts":
-/*!***************************!*\
-  !*** ./src/base/split.ts ***!
-  \***************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
 const is_1 = __webpack_require__(/*! ./is */ "./src/base/is.ts");
-const to_1 = __webpack_require__(/*! ./to */ "./src/base/to.ts");
-function default_1(str) {
-    const r = [];
-    let q = null;
-    let p = null;
-    for (let i = 0; i < str.length; i++) {
-        const c = str.charAt(i);
-        if (!is_1.default.un(q)) {
-            if (c === '\\')
-                i++;
-            else if (c === q) {
-                r.push(eval(str.slice(p, i + 1)));
-                q = null;
-                p = null;
-            }
-        }
-        else if (to_1.default.has('\'"`', c)) {
-            q = c;
-            p = i;
-        }
-        else if (!is_1.default.un(p)) {
-            if (to_1.default.has(' \n', c)) {
-                r.push(str.slice(p, i));
-                p = null;
-            }
-        }
-        else if (!to_1.default.has(' \n', c))
-            p = i;
+exports.default = new (class {
+    constructor() {
+        this.join = (strs, sep) => {
+            if (is_1.default.un(sep))
+                sep = '';
+            return strs.join(sep);
+        };
+        this.reverse = (str) => str.split('').reverse().join('');
+        this.tightSpaces = (str) => str.replace(/ +/g, ' ');
+        this.trimLeft = (str) => str.replace(/^[ \n]+/, '');
+        this.trimRight = (str) => str.replace(/[ \n]+$/, '');
+        this.trim = (str) => this.trimRight(this.trimLeft(str));
+        this.split = (str) => str.split(/[ \n]+/);
+        this.splitLines = (str) => str.split(/\n+/);
+        this.splitLeft = (str) => {
+            const i = str.indexOf(' ');
+            if (i < 0)
+                return [str, null];
+            return [str.slice(0, i), str.slice(i + 1)];
+        };
     }
-    if (!is_1.default.un(p))
-        r.push(str.slice(p, str.length));
-    return r;
-}
-exports.default = default_1;
-
-
-/***/ }),
-
-/***/ "./src/base/sugar.ts":
-/*!***************************!*\
-  !*** ./src/base/sugar.ts ***!
-  \***************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const is_1 = __webpack_require__(/*! ./is */ "./src/base/is.ts");
-function default_1(args, keys) {
-    for (const k in keys) {
-        const s = keys[k];
-        if (is_1.default.un(args[k]))
-            args[k] = args[s];
-    }
-    return args;
-}
-exports.default = default_1;
+})();
 
 
 /***/ }),
@@ -480,7 +490,7 @@ exports.default = new (class {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const is_1 = __webpack_require__(/*! ./is */ "./src/base/is.ts");
 const sym_1 = __webpack_require__(/*! ./sym */ "./src/base/sym.ts");
-const has_1 = __webpack_require__(/*! ./has */ "./src/base/has.ts");
+const util_1 = __webpack_require__(/*! ./util */ "./src/base/util.ts");
 exports.default = new (class {
     constructor() {
         this.type = (x) => {
@@ -497,7 +507,7 @@ exports.default = new (class {
             return x.constructor;
         };
         this.obj = (x) => {
-            if (has_1.objHas(x, sym_1.default.obj))
+            if (util_1.objHas(x, sym_1.default.obj))
                 return x[sym_1.default.obj]();
             if (is_1.default.map(x)) {
                 const r = {};
@@ -523,7 +533,7 @@ exports.default = new (class {
             return x;
         };
         this.str = (x, ...args) => {
-            if (has_1.objHas(x, sym_1.default.str))
+            if (util_1.objHas(x, sym_1.default.str))
                 return x[sym_1.default.str](...args);
             const strToKey = (x) => {
                 const r = x.match(/^[$A-Za-z_][$0-9A-Za-z_]*$/);
@@ -574,7 +584,7 @@ exports.default = new (class {
             return toStr(this.obj(x), n);
         };
         this.bool = (x) => {
-            if (has_1.objHas(x, sym_1.default.bool))
+            if (util_1.objHas(x, sym_1.default.bool))
                 return x[sym_1.default.bool]();
             if (is_1.default.un(x))
                 return false;
@@ -594,7 +604,7 @@ exports.default = new (class {
             return true;
         };
         this.size = (x) => {
-            if (has_1.objHas(x, sym_1.default.size))
+            if (util_1.objHas(x, sym_1.default.size))
                 return x[sym_1.default.size]();
             if (is_1.default.str(x) || is_1.default.arr(x))
                 return x.length;
@@ -609,7 +619,7 @@ exports.default = new (class {
             return null;
         };
         this.has = (x, i) => {
-            if (has_1.objHas(x, sym_1.default.has))
+            if (util_1.objHas(x, sym_1.default.has))
                 return x[sym_1.default.has](i);
             if (is_1.default.str(x)) {
                 if (is_1.default.str(i))
@@ -627,7 +637,7 @@ exports.default = new (class {
             return false;
         };
         this.iter = (x) => {
-            if (has_1.objHas(x, sym_1.default.iter))
+            if (util_1.objHas(x, sym_1.default.iter))
                 return x[sym_1.default.iter]();
             if (is_1.default.iter(x))
                 return x[Symbol.iterator]();
@@ -642,7 +652,7 @@ exports.default = new (class {
             })(x);
         };
         this.vki = (x) => {
-            if (has_1.objHas(x, sym_1.default.vki))
+            if (util_1.objHas(x, sym_1.default.vki))
                 return x[sym_1.default.vki]();
             return (function* (x) {
                 if (is_1.default.un(x))
@@ -687,24 +697,111 @@ exports.default = new (class {
 
 /***/ }),
 
+/***/ "./src/base/util.ts":
+/*!**************************!*\
+  !*** ./src/base/util.ts ***!
+  \**************************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.assert = exports.sugar = exports.line = exports.split = exports.join = exports.map = exports.objHas = exports.funcHas = exports.has = void 0;
+const is_1 = __webpack_require__(/*! ./is */ "./src/base/is.ts");
+const to_1 = __webpack_require__(/*! ./to */ "./src/base/to.ts");
+const err_1 = __webpack_require__(/*! ./err */ "./src/base/err.ts");
+function has(x, attr) {
+    return (is_1.default.func(x) || is_1.default.obj(x)) && attr in x;
+}
+exports.has = has;
+function funcHas(x, attr) {
+    return is_1.default.func(x) && attr in x;
+}
+exports.funcHas = funcHas;
+function objHas(x, attr) {
+    return is_1.default.obj(x) && attr in x;
+}
+exports.objHas = objHas;
+function* map(x, func) {
+    for (const [v, k, i] of to_1.default.vki(x))
+        yield func(v, k, i);
+}
+exports.map = map;
+function join(arr, sep) {
+    if (is_1.default.un(sep))
+        sep = '';
+    return [...to_1.default.iter(arr)].join(sep);
+}
+exports.join = join;
+function split(str) {
+    const r = [];
+    let q = null;
+    let p = null;
+    for (let i = 0; i < str.length; i++) {
+        const c = str.charAt(i);
+        if (!is_1.default.un(q)) {
+            if (c === '\\')
+                i++;
+            else if (c === q) {
+                r.push(eval(str.slice(p, i + 1)));
+                q = null;
+                p = null;
+            }
+        }
+        else if (to_1.default.has('\'"`', c)) {
+            q = c;
+            p = i;
+        }
+        else if (!is_1.default.un(p)) {
+            if (to_1.default.has(' \n', c)) {
+                r.push(str.slice(p, i));
+                p = null;
+            }
+        }
+        else if (!to_1.default.has(' \n', c))
+            p = i;
+    }
+    if (!is_1.default.un(p))
+        r.push(str.slice(p));
+    return r;
+}
+exports.split = split;
+function line(str, num) {
+    if (is_1.default.un(str))
+        str = '-';
+    if (is_1.default.un(num))
+        num = 64;
+    return str.repeat(num);
+}
+exports.line = line;
+function sugar(args, keys) {
+    for (const k in keys) {
+        const s = keys[k];
+        if (is_1.default.un(args[k]))
+            args[k] = args[s];
+    }
+    return args;
+}
+exports.sugar = sugar;
+function assert(cdt, msg) {
+    if (!cdt) {
+        if (is_1.default.un(msg))
+            err_1.default.assertionFail();
+        else
+            err_1.default.$(msg);
+    }
+}
+exports.assert = assert;
+
+
+/***/ }),
+
 /***/ "./src/code/Code.ts":
 /*!**************************!*\
   !*** ./src/code/Code.ts ***!
   \**************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const base_1 = __webpack_require__(/*! ../base */ "./src/base/index.ts");
 const container_1 = __webpack_require__(/*! ../container */ "./src/container/index.ts");
@@ -729,9 +826,9 @@ class Code {
             if (base_1.is.arr(arg))
                 return new CodeChain(arg);
             if (base_1.is.obj(arg)) {
-                let _a = base_1.sugar(arg, {
+                let { extension, X, ...rem } = base_1.sugar(arg, {
                     extension: 'X'
-                }), { extension, X } = _a, rem = __rest(_a, ["extension", "X"]);
+                });
                 if (!base_1.is.un(extension)) {
                     extension = this.extension.get(extension);
                     if (base_1.is.un(extension))
@@ -754,6 +851,9 @@ class Code {
         return base_1.to.bool(this.code);
     }
     toString() {
+        return this.code;
+    }
+    get $() {
         return this.code;
     }
 }
@@ -783,7 +883,7 @@ class CodeTree extends Code {
         });
         if (base_1.is.un(placeholder))
             placeholder = '@';
-        base_1.asrt(base_1.to.bool(placeholder), 'placeholder不能为空字符串！');
+        base_1.assert(base_1.to.bool(placeholder), 'placeholder不能为空字符串！');
         const templates = template.split(placeholder);
         const t = [];
         for (let i = 0; i < templates.length - 1; i++) {
@@ -804,31 +904,24 @@ const codeNull = new CodeNull();
 /*!*********************************!*\
   !*** ./src/code/CodeBracket.ts ***!
   \*********************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.CodeBracketCurly = exports.CodeBracketSquare = exports.CodeBracketRound = void 0;
 const base_1 = __webpack_require__(/*! ../base */ "./src/base/index.ts");
 const Code_1 = __webpack_require__(/*! ./Code */ "./src/code/Code.ts");
 class CodeBracket extends Code_1.default {
     constructor(args, bracket) {
-        const _a = base_1.sugar(args, {
+        const { template, T, codes, code, C, ...rem } = base_1.sugar(args, {
             template: 'T',
             code: 'C'
-        }), { template, T, codes, code, C } = _a, rem = __rest(_a, ["template", "T", "codes", "code", "C"]);
-        super(Code_1.default.new(Object.assign({ template: bracket, codes: [code] }, rem)).code);
+        });
+        super(Code_1.default.new({
+            template: bracket,
+            codes: [code],
+            ...rem
+        }).$);
     }
 }
 exports.default = CodeBracket;
@@ -861,30 +954,23 @@ Code_1.default.extension.set('{}', x => new CodeBracketCurly(x));
 /*!*********************************!*\
   !*** ./src/code/CodeClosure.ts ***!
   \*********************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const base_1 = __webpack_require__(/*! ../base */ "./src/base/index.ts");
 const Code_1 = __webpack_require__(/*! ./Code */ "./src/code/Code.ts");
 class CodeClosure extends Code_1.default {
     constructor(args) {
-        const _a = base_1.sugar(args, {
+        const { template, T, codes, code, C, ...rem } = base_1.sugar(args, {
             template: 'T',
             code: 'C'
-        }), { template, T, codes, code, C } = _a, rem = __rest(_a, ["template", "T", "codes", "code", "C"]);
-        super(Code_1.default.new(Object.assign({ template: template, codes: [code] }, rem)).code);
+        });
+        super(Code_1.default.new({
+            template: template,
+            codes: [code],
+            ...rem
+        }).$);
     }
 }
 exports.default = CodeClosure;
@@ -902,7 +988,7 @@ Code_1.default.extension.set('C', x => new CodeClosure(x));
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CodeObj = exports.CodeMap = exports.CodeArr = exports.CodeSet = exports.CodeDict = exports.CodeList = void 0;
+exports.CodeDict = exports.CodeList = exports.CodeMap = exports.CodeSet = exports.CodeArr = exports.CodeObj = void 0;
 const base_1 = __webpack_require__(/*! ../base */ "./src/base/index.ts");
 const Code_1 = __webpack_require__(/*! ./Code */ "./src/code/Code.ts");
 const CodeVar_1 = __webpack_require__(/*! ./CodeVar */ "./src/code/CodeVar.ts");
@@ -918,6 +1004,30 @@ class CodeContainer extends CodeVar_1.default {
     }
 }
 exports.default = CodeContainer;
+class CodeObj extends CodeContainer {
+    constructor(args) {
+        super(args, `{@}`, `@: @`, (v, k) => [k, v]);
+    }
+}
+exports.CodeObj = CodeObj;
+class CodeArr extends CodeContainer {
+    constructor(args) {
+        super(args, `[@]`, `@`, v => [v]);
+    }
+}
+exports.CodeArr = CodeArr;
+class CodeSet extends CodeContainer {
+    constructor(args) {
+        super(args, `new Set([@])`, `@`, v => [v]);
+    }
+}
+exports.CodeSet = CodeSet;
+class CodeMap extends CodeContainer {
+    constructor(args) {
+        super(args, `to.map({@})`, `@: @`, (v, k) => [k, v]);
+    }
+}
+exports.CodeMap = CodeMap;
 class CodeList extends CodeContainer {
     constructor(args) {
         super(args, `new List([@])`, `@`, v => [v]);
@@ -930,42 +1040,18 @@ class CodeDict extends CodeContainer {
     }
 }
 exports.CodeDict = CodeDict;
-class CodeSet extends CodeContainer {
-    constructor(args) {
-        super(args, `new Set([@])`, `@`, v => [v]);
-    }
-}
-exports.CodeSet = CodeSet;
-class CodeArr extends CodeContainer {
-    constructor(args) {
-        super(args, `[@]`, `@`, v => [v]);
-    }
-}
-exports.CodeArr = CodeArr;
-class CodeMap extends CodeContainer {
-    constructor(args) {
-        super(args, `to.map({@})`, `@: @`, (v, k) => [k, v]);
-    }
-}
-exports.CodeMap = CodeMap;
-class CodeObj extends CodeContainer {
-    constructor(args) {
-        super(args, `{@}`, `@: @`, (v, k) => [k, v]);
-    }
-}
-exports.CodeObj = CodeObj;
+Code_1.default.extension.set('obj', x => new CodeObj(x));
+Code_1.default.extension.set('O', x => new CodeObj(x));
+Code_1.default.extension.set('arr', x => new CodeArr(x));
+Code_1.default.extension.set('A', x => new CodeArr(x));
+Code_1.default.extension.set('set', x => new CodeSet(x));
+Code_1.default.extension.set('S', x => new CodeSet(x));
+Code_1.default.extension.set('map', x => new CodeMap(x));
+Code_1.default.extension.set('M', x => new CodeMap(x));
 Code_1.default.extension.set('list', x => new CodeList(x));
 Code_1.default.extension.set('L', x => new CodeList(x));
 Code_1.default.extension.set('dict', x => new CodeDict(x));
 Code_1.default.extension.set('D', x => new CodeDict(x));
-Code_1.default.extension.set('set', x => new CodeSet(x));
-Code_1.default.extension.set('S', x => new CodeSet(x));
-Code_1.default.extension.set('arr', x => new CodeArr(x));
-Code_1.default.extension.set('A', x => new CodeArr(x));
-Code_1.default.extension.set('map', x => new CodeMap(x));
-Code_1.default.extension.set('M', x => new CodeMap(x));
-Code_1.default.extension.set('obj', x => new CodeObj(x));
-Code_1.default.extension.set('O', x => new CodeObj(x));
 
 
 /***/ }),
@@ -974,33 +1060,22 @@ Code_1.default.extension.set('O', x => new CodeObj(x));
 /*!*****************************!*\
   !*** ./src/code/CodeVar.ts ***!
   \*****************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var __rest = (this && this.__rest) || function (s, e) {
-    var t = {};
-    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
-        t[p] = s[p];
-    if (s != null && typeof Object.getOwnPropertySymbols === "function")
-        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
-            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
-                t[p[i]] = s[p[i]];
-        }
-    return t;
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const base_1 = __webpack_require__(/*! ../base */ "./src/base/index.ts");
 const Code_1 = __webpack_require__(/*! ./Code */ "./src/code/Code.ts");
 class CodeVar extends Code_1.default {
     constructor(args, codeInit) {
-        let _a = base_1.sugar(args, {
+        let { template, T, codes, closure, C, variable, V, name, N, init, I, opr, O, ...rem } = base_1.sugar(args, {
             template: 'T',
             closure: 'C',
             variable: 'V',
             name: 'N',
             init: 'I',
             opr: 'O'
-        }), { template, T, codes, closure, C, variable, V, name, N, init, I, opr, O } = _a, rem = __rest(_a, ["template", "T", "codes", "closure", "C", "variable", "V", "name", "N", "init", "I", "opr", "O"]);
+        });
         if (base_1.is.un(closure))
             closure = `(()=>{@})()`;
         if (base_1.is.un(variable))
@@ -1010,9 +1085,15 @@ class CodeVar extends Code_1.default {
         if (base_1.is.un(codeInit))
             codeInit = init => init;
         if (!base_1.to.bool(opr))
-            super(Code_1.default.new(Object.assign({ template: '@', codes: [codeInit(init)] }, rem)).code);
+            super(Code_1.default.new({
+                template: '@',
+                codes: [codeInit(init)],
+                ...rem
+            }).$);
         else
-            super(Code_1.default.new(Object.assign({ template: closure, codes: [{
+            super(Code_1.default.new({
+                template: closure,
+                codes: [{
                         template: `@ @ = @\n@\nreturn @`,
                         codes: [
                             variable ? 'let' : 'const',
@@ -1021,7 +1102,9 @@ class CodeVar extends Code_1.default {
                             opr,
                             name
                         ]
-                    }] }, rem)).code);
+                    }],
+                ...rem
+            }).$);
     }
 }
 exports.default = CodeVar;
@@ -1039,26 +1122,26 @@ Code_1.default.extension.set('V', x => new CodeVar(x));
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.CodeObj = exports.CodeMap = exports.CodeArr = exports.CodeSet = exports.CodeDict = exports.CodeList = exports.CodeContainer = exports.CodeVar = exports.CodeBracketCurly = exports.CodeBracketSquare = exports.CodeBracketRound = exports.CodeBracket = exports.CodeClosure = exports.Code = void 0;
-var Code_1 = __webpack_require__(/*! ./Code */ "./src/code/Code.ts");
-Object.defineProperty(exports, "Code", ({ enumerable: true, get: function () { return Code_1.default; } }));
-var CodeClosure_1 = __webpack_require__(/*! ./CodeClosure */ "./src/code/CodeClosure.ts");
-Object.defineProperty(exports, "CodeClosure", ({ enumerable: true, get: function () { return CodeClosure_1.default; } }));
-var CodeBracket_1 = __webpack_require__(/*! ./CodeBracket */ "./src/code/CodeBracket.ts");
-Object.defineProperty(exports, "CodeBracket", ({ enumerable: true, get: function () { return CodeBracket_1.default; } }));
+exports.CodeDict = exports.CodeList = exports.CodeMap = exports.CodeSet = exports.CodeArr = exports.CodeObj = exports.CodeContainer = exports.CodeVar = exports.CodeBracketCurly = exports.CodeBracketSquare = exports.CodeBracketRound = exports.CodeBracket = exports.CodeClosure = exports.Code = void 0;
+const Code_1 = __webpack_require__(/*! ./Code */ "./src/code/Code.ts");
+exports.Code = Code_1.default;
+const CodeClosure_1 = __webpack_require__(/*! ./CodeClosure */ "./src/code/CodeClosure.ts");
+exports.CodeClosure = CodeClosure_1.default;
+const CodeBracket_1 = __webpack_require__(/*! ./CodeBracket */ "./src/code/CodeBracket.ts");
+exports.CodeBracket = CodeBracket_1.default;
 Object.defineProperty(exports, "CodeBracketRound", ({ enumerable: true, get: function () { return CodeBracket_1.CodeBracketRound; } }));
 Object.defineProperty(exports, "CodeBracketSquare", ({ enumerable: true, get: function () { return CodeBracket_1.CodeBracketSquare; } }));
 Object.defineProperty(exports, "CodeBracketCurly", ({ enumerable: true, get: function () { return CodeBracket_1.CodeBracketCurly; } }));
-var CodeVar_1 = __webpack_require__(/*! ./CodeVar */ "./src/code/CodeVar.ts");
-Object.defineProperty(exports, "CodeVar", ({ enumerable: true, get: function () { return CodeVar_1.default; } }));
-var CodeContainer_1 = __webpack_require__(/*! ./CodeContainer */ "./src/code/CodeContainer.ts");
-Object.defineProperty(exports, "CodeContainer", ({ enumerable: true, get: function () { return CodeContainer_1.default; } }));
+const CodeVar_1 = __webpack_require__(/*! ./CodeVar */ "./src/code/CodeVar.ts");
+exports.CodeVar = CodeVar_1.default;
+const CodeContainer_1 = __webpack_require__(/*! ./CodeContainer */ "./src/code/CodeContainer.ts");
+exports.CodeContainer = CodeContainer_1.default;
+Object.defineProperty(exports, "CodeObj", ({ enumerable: true, get: function () { return CodeContainer_1.CodeObj; } }));
+Object.defineProperty(exports, "CodeArr", ({ enumerable: true, get: function () { return CodeContainer_1.CodeArr; } }));
+Object.defineProperty(exports, "CodeSet", ({ enumerable: true, get: function () { return CodeContainer_1.CodeSet; } }));
+Object.defineProperty(exports, "CodeMap", ({ enumerable: true, get: function () { return CodeContainer_1.CodeMap; } }));
 Object.defineProperty(exports, "CodeList", ({ enumerable: true, get: function () { return CodeContainer_1.CodeList; } }));
 Object.defineProperty(exports, "CodeDict", ({ enumerable: true, get: function () { return CodeContainer_1.CodeDict; } }));
-Object.defineProperty(exports, "CodeSet", ({ enumerable: true, get: function () { return CodeContainer_1.CodeSet; } }));
-Object.defineProperty(exports, "CodeArr", ({ enumerable: true, get: function () { return CodeContainer_1.CodeArr; } }));
-Object.defineProperty(exports, "CodeMap", ({ enumerable: true, get: function () { return CodeContainer_1.CodeMap; } }));
-Object.defineProperty(exports, "CodeObj", ({ enumerable: true, get: function () { return CodeContainer_1.CodeObj; } }));
 
 
 /***/ }),
@@ -1067,19 +1150,13 @@ Object.defineProperty(exports, "CodeObj", ({ enumerable: true, get: function () 
 /*!************************************!*\
   !*** ./src/container/Container.ts ***!
   \************************************/
-/***/ (function(__unused_webpack_module, exports, __webpack_require__) {
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
 
 
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const base_1 = __webpack_require__(/*! ../base */ "./src/base/index.ts");
-const mixin_1 = __webpack_require__(/*! ../mixin */ "./src/mixin/index.ts");
-let Container = class Container {
+const Decor_1 = __webpack_require__(/*! ../Decor */ "./src/Decor.ts");
+class Container {
     constructor(container) {
         this.container = container;
     }
@@ -1231,13 +1308,10 @@ let Container = class Container {
         this._merge(args);
         return this;
     }
-    $(...args) {
-        return base_1.err.notImplemented();
+    decor(...args) {
+        return Decor_1.default.new(...args).$(this);
     }
-};
-Container = __decorate([
-    mixin_1.mount('$')
-], Container);
+}
 exports.default = Container;
 
 
@@ -1476,14 +1550,14 @@ class MassConstructor extends Mass {
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Mass = exports.Dict = exports.List = exports.Container = void 0;
-var Container_1 = __webpack_require__(/*! ./Container */ "./src/container/Container.ts");
-Object.defineProperty(exports, "Container", ({ enumerable: true, get: function () { return Container_1.default; } }));
-var List_1 = __webpack_require__(/*! ./List */ "./src/container/List.ts");
-Object.defineProperty(exports, "List", ({ enumerable: true, get: function () { return List_1.default; } }));
-var Dict_1 = __webpack_require__(/*! ./Dict */ "./src/container/Dict.ts");
-Object.defineProperty(exports, "Dict", ({ enumerable: true, get: function () { return Dict_1.default; } }));
-var Mass_1 = __webpack_require__(/*! ./Mass */ "./src/container/Mass.ts");
-Object.defineProperty(exports, "Mass", ({ enumerable: true, get: function () { return Mass_1.default; } }));
+const Container_1 = __webpack_require__(/*! ./Container */ "./src/container/Container.ts");
+exports.Container = Container_1.default;
+const List_1 = __webpack_require__(/*! ./List */ "./src/container/List.ts");
+exports.List = List_1.default;
+const Dict_1 = __webpack_require__(/*! ./Dict */ "./src/container/Dict.ts");
+exports.Dict = Dict_1.default;
+const Mass_1 = __webpack_require__(/*! ./Mass */ "./src/container/Mass.ts");
+exports.Mass = Mass_1.default;
 
 
 /***/ }),
@@ -1496,50 +1570,49 @@ Object.defineProperty(exports, "Mass", ({ enumerable: true, get: function () { r
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const base_1 = __webpack_require__(/*! ./base */ "./src/base/index.ts");
-const container_1 = __webpack_require__(/*! ./container */ "./src/container/index.ts");
-const mixin_1 = __webpack_require__(/*! ./mixin */ "./src/mixin/index.ts");
-const code_1 = __webpack_require__(/*! ./code */ "./src/code/index.ts");
+const base = __webpack_require__(/*! ./base */ "./src/base/index.ts");
+const container = __webpack_require__(/*! ./container */ "./src/container/index.ts");
+const code = __webpack_require__(/*! ./code */ "./src/code/index.ts");
 const Decor_1 = __webpack_require__(/*! ./Decor */ "./src/Decor.ts");
-const util_1 = __webpack_require__(/*! ./util */ "./src/util.ts");
-const is = base_1.is;
-const to = base_1.to;
-const sym = base_1.sym;
-const map = base_1.map;
-const join = base_1.join;
-const split = base_1.split;
-const has = base_1.has;
-const funcHas = base_1.funcHas;
-const objHas = base_1.objHas;
-const init = base_1.init;
-const sugar = base_1.sugar;
-const err = base_1.err;
-const asrt = base_1.asrt;
-const Container = container_1.Container;
-const List = container_1.List;
-const Dict = container_1.Dict;
-const Mass = container_1.Mass;
-const mount = mixin_1.mount;
-const Code = code_1.Code;
-const CodeClosure = code_1.CodeClosure;
-const CodeBracket = code_1.CodeBracket;
-const CodeBracketRound = code_1.CodeBracketRound;
-const CodeBracketSquare = code_1.CodeBracketSquare;
-const CodeBracketCurly = code_1.CodeBracketCurly;
-const CodeVar = code_1.CodeVar;
-const CodeContainer = code_1.CodeContainer;
-const CodeList = code_1.CodeList;
-const CodeDict = code_1.CodeDict;
-const CodeSet = code_1.CodeSet;
-const CodeArr = code_1.CodeArr;
-const CodeMap = code_1.CodeMap;
-const CodeObj = code_1.CodeObj;
+const is = base.is;
+const to = base.to;
+const sym = base.sym;
+const init = base.init;
+const str = base.str;
+const arr = base.arr;
+const decor = base.decor;
+const print = base.print;
+const err = base.err;
+const has = base.has;
+const funcHas = base.funcHas;
+const objHas = base.objHas;
+const map = base.map;
+const join = base.join;
+const split = base.split;
+const line = base.line;
+const sugar = base.sugar;
+const assert = base.assert;
+const Container = container.Container;
+const List = container.List;
+const Dict = container.Dict;
+const Mass = container.Mass;
+const Code = code.Code;
+const CodeClosure = code.CodeClosure;
+const CodeBracket = code.CodeBracket;
+const CodeBracketRound = code.CodeBracketRound;
+const CodeBracketSquare = code.CodeBracketSquare;
+const CodeBracketCurly = code.CodeBracketCurly;
+const CodeVar = code.CodeVar;
+const CodeContainer = code.CodeContainer;
+const CodeObj = code.CodeObj;
+const CodeArr = code.CodeArr;
+const CodeSet = code.CodeSet;
+const CodeMap = code.CodeMap;
+const CodeList = code.CodeList;
+const CodeDict = code.CodeDict;
 const Decor = Decor_1.default;
-const print = util_1.print;
-const printObj = util_1.printObj;
-const printLine = util_1.printLine;
 function default_1(code, context, contextName) {
-    code = Code.new(code).code;
+    code = Code.new(code).$;
     if (is.un(context))
         return eval(code);
     if (is.un(contextName))
@@ -1547,7 +1620,7 @@ function default_1(code, context, contextName) {
     return eval(Code.new({
         template: `(@ => @)`,
         codes: [contextName, code]
-    }).code)(context);
+    }).$)(context);
 }
 exports.default = default_1;
 
@@ -1562,113 +1635,50 @@ exports.default = default_1;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.evaluate = exports.util = exports.code = exports.container = exports.mixin = exports.Decor = exports.base = void 0;
-exports.base = __webpack_require__(/*! ./base */ "./src/base/index.ts");
-var Decor_1 = __webpack_require__(/*! ./Decor */ "./src/Decor.ts");
-Object.defineProperty(exports, "Decor", ({ enumerable: true, get: function () { return Decor_1.default; } }));
-exports.mixin = __webpack_require__(/*! ./mixin */ "./src/mixin/index.ts");
-exports.container = __webpack_require__(/*! ./container */ "./src/container/index.ts");
-exports.code = __webpack_require__(/*! ./code */ "./src/code/index.ts");
-exports.util = __webpack_require__(/*! ./util */ "./src/util.ts");
-var evaluate_1 = __webpack_require__(/*! ./evaluate */ "./src/evaluate.ts");
-Object.defineProperty(exports, "evaluate", ({ enumerable: true, get: function () { return evaluate_1.default; } }));
-
-
-/***/ }),
-
-/***/ "./src/mixin/index.ts":
-/*!****************************!*\
-  !*** ./src/mixin/index.ts ***!
-  \****************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.mount = void 0;
-var mount_1 = __webpack_require__(/*! ./mount */ "./src/mixin/mount.ts");
-Object.defineProperty(exports, "mount", ({ enumerable: true, get: function () { return mount_1.default; } }));
-
-
-/***/ }),
-
-/***/ "./src/mixin/mount.ts":
-/*!****************************!*\
-  !*** ./src/mixin/mount.ts ***!
-  \****************************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-const Decor_1 = __webpack_require__(/*! ../Decor */ "./src/Decor.ts");
-function default_1(attr) {
-    return function (cls) {
-        cls.prototype[attr] = function (...args) {
-            return Decor_1.default.new(...args).decor(this);
-        };
-        return cls;
-    };
-}
-exports.default = default_1;
-
-
-/***/ }),
-
-/***/ "./src/util.ts":
-/*!*********************!*\
-  !*** ./src/util.ts ***!
-  \*********************/
-/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
-
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getTestData = exports.line = exports.printLine = exports.printObj = exports.print = void 0;
+exports.evaluate = exports.Decor = exports.CodeDict = exports.CodeList = exports.CodeMap = exports.CodeSet = exports.CodeArr = exports.CodeObj = exports.CodeContainer = exports.CodeVar = exports.CodeBracketCurly = exports.CodeBracketSquare = exports.CodeBracketRound = exports.CodeBracket = exports.CodeClosure = exports.Code = exports.Mass = exports.Dict = exports.List = exports.Container = exports.assert = exports.sugar = exports.line = exports.split = exports.join = exports.map = exports.objHas = exports.funcHas = exports.has = exports.err = exports.print = exports.decor = exports.arr = exports.str = exports.init = exports.sym = exports.to = exports.is = void 0;
 const base_1 = __webpack_require__(/*! ./base */ "./src/base/index.ts");
-function print(...args) {
-    console.log(...args);
-}
-exports.print = print;
-function printObj(...args) {
-    print(...args.map(i => base_1.to.str(i)));
-}
-exports.printObj = printObj;
-function printLine(...args) {
-    print(line(...args));
-}
-exports.printLine = printLine;
-function line(str, num) {
-    if (base_1.is.un(str))
-        str = '-';
-    if (base_1.is.un(num))
-        num = 64;
-    return str.repeat(num);
-}
-exports.line = line;
-function getTestData() {
-    return new Map([
-        ['undefined', undefined],
-        ['null', null],
-        ['false', false],
-        ['true', true],
-        ['0', 0],
-        ['123', 123],
-        ['0.0', 0.0],
-        ['3.14', 3.14],
-        ["''", ''],
-        ["'Hello'", 'Hello'],
-        [Symbol(), Symbol()],
-        ['func', function () { }],
-        ['lambda', () => { }],
-        ['{}', {}],
-        ['{...}', { a: 123, b: 'hahaha' }],
-        ['[]', []],
-        ['[...]', [11, 22, 22, 33]],
-        ['Set()', new Set()],
-        ['Set(...)', new Set([11, 22, 22, 33])],
-        ['Map()', new Map()],
-        ['Map(...)', new Map([['a', 123], ['b', 'hahaha']])],
-    ]);
-}
-exports.getTestData = getTestData;
+Object.defineProperty(exports, "is", ({ enumerable: true, get: function () { return base_1.is; } }));
+Object.defineProperty(exports, "to", ({ enumerable: true, get: function () { return base_1.to; } }));
+Object.defineProperty(exports, "sym", ({ enumerable: true, get: function () { return base_1.sym; } }));
+Object.defineProperty(exports, "init", ({ enumerable: true, get: function () { return base_1.init; } }));
+Object.defineProperty(exports, "str", ({ enumerable: true, get: function () { return base_1.str; } }));
+Object.defineProperty(exports, "arr", ({ enumerable: true, get: function () { return base_1.arr; } }));
+Object.defineProperty(exports, "decor", ({ enumerable: true, get: function () { return base_1.decor; } }));
+Object.defineProperty(exports, "print", ({ enumerable: true, get: function () { return base_1.print; } }));
+Object.defineProperty(exports, "err", ({ enumerable: true, get: function () { return base_1.err; } }));
+Object.defineProperty(exports, "has", ({ enumerable: true, get: function () { return base_1.has; } }));
+Object.defineProperty(exports, "funcHas", ({ enumerable: true, get: function () { return base_1.funcHas; } }));
+Object.defineProperty(exports, "objHas", ({ enumerable: true, get: function () { return base_1.objHas; } }));
+Object.defineProperty(exports, "map", ({ enumerable: true, get: function () { return base_1.map; } }));
+Object.defineProperty(exports, "join", ({ enumerable: true, get: function () { return base_1.join; } }));
+Object.defineProperty(exports, "split", ({ enumerable: true, get: function () { return base_1.split; } }));
+Object.defineProperty(exports, "line", ({ enumerable: true, get: function () { return base_1.line; } }));
+Object.defineProperty(exports, "sugar", ({ enumerable: true, get: function () { return base_1.sugar; } }));
+Object.defineProperty(exports, "assert", ({ enumerable: true, get: function () { return base_1.assert; } }));
+const container_1 = __webpack_require__(/*! ./container */ "./src/container/index.ts");
+Object.defineProperty(exports, "Container", ({ enumerable: true, get: function () { return container_1.Container; } }));
+Object.defineProperty(exports, "List", ({ enumerable: true, get: function () { return container_1.List; } }));
+Object.defineProperty(exports, "Dict", ({ enumerable: true, get: function () { return container_1.Dict; } }));
+Object.defineProperty(exports, "Mass", ({ enumerable: true, get: function () { return container_1.Mass; } }));
+const code_1 = __webpack_require__(/*! ./code */ "./src/code/index.ts");
+Object.defineProperty(exports, "Code", ({ enumerable: true, get: function () { return code_1.Code; } }));
+Object.defineProperty(exports, "CodeClosure", ({ enumerable: true, get: function () { return code_1.CodeClosure; } }));
+Object.defineProperty(exports, "CodeBracket", ({ enumerable: true, get: function () { return code_1.CodeBracket; } }));
+Object.defineProperty(exports, "CodeBracketRound", ({ enumerable: true, get: function () { return code_1.CodeBracketRound; } }));
+Object.defineProperty(exports, "CodeBracketSquare", ({ enumerable: true, get: function () { return code_1.CodeBracketSquare; } }));
+Object.defineProperty(exports, "CodeBracketCurly", ({ enumerable: true, get: function () { return code_1.CodeBracketCurly; } }));
+Object.defineProperty(exports, "CodeVar", ({ enumerable: true, get: function () { return code_1.CodeVar; } }));
+Object.defineProperty(exports, "CodeContainer", ({ enumerable: true, get: function () { return code_1.CodeContainer; } }));
+Object.defineProperty(exports, "CodeObj", ({ enumerable: true, get: function () { return code_1.CodeObj; } }));
+Object.defineProperty(exports, "CodeArr", ({ enumerable: true, get: function () { return code_1.CodeArr; } }));
+Object.defineProperty(exports, "CodeSet", ({ enumerable: true, get: function () { return code_1.CodeSet; } }));
+Object.defineProperty(exports, "CodeMap", ({ enumerable: true, get: function () { return code_1.CodeMap; } }));
+Object.defineProperty(exports, "CodeList", ({ enumerable: true, get: function () { return code_1.CodeList; } }));
+Object.defineProperty(exports, "CodeDict", ({ enumerable: true, get: function () { return code_1.CodeDict; } }));
+const Decor_1 = __webpack_require__(/*! ./Decor */ "./src/Decor.ts");
+exports.Decor = Decor_1.default;
+const evaluate_1 = __webpack_require__(/*! ./evaluate */ "./src/evaluate.ts");
+exports.evaluate = evaluate_1.default;
 
 
 /***/ })
@@ -1692,7 +1702,7 @@ exports.getTestData = getTestData;
 /******/ 		};
 /******/ 	
 /******/ 		// Execute the module function
-/******/ 		__webpack_modules__[moduleId].call(module.exports, module, module.exports, __webpack_require__);
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
 /******/ 	
 /******/ 		// Return the exports of the module
 /******/ 		return module.exports;
@@ -1705,4 +1715,3 @@ exports.getTestData = getTestData;
 /******/ 	return __webpack_require__("./src/index.ts");
 /******/ })()
 ;
-});

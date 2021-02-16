@@ -101,7 +101,6 @@ export default abstract class Mass extends Container<any, any> {
   }
 }
 
-
 class MassConstructor extends Mass {
   public constructor(container?: any) {
     super(container)

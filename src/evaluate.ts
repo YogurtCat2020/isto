@@ -11,6 +11,12 @@ const init = base.init
 const str = base.str
 const arr = base.arr
 const decor = base.decor
+const decorClsHasMeth = base.decorClsHasMeth
+const decorClsNewMeth = base.decorClsNewMeth
+const decorClsSetMeth = base.decorClsSetMeth
+const decorClsApplyParam = base.decorClsApplyParam
+const decorClsApplyMeth = base.decorClsApplyMeth
+const decorClsApplyClass = base.decorClsApplyClass
 const print = base.print
 const err = base.err
 const has = base.has
@@ -66,6 +72,8 @@ let f = (m, s) => s
 console.log([f('base', `is, to, sym, init,
   str, arr,
   decor,
+  decorClsHasMeth, decorClsNewMeth, decorClsSetMeth,
+  decorClsApplyParam, decorClsApplyMeth, decorClsApplyClass,
   print,
   err,
   has, funcHas, objHas,

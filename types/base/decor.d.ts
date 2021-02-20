@@ -20,3 +20,13 @@ declare const _default: {
     };
 };
 export default _default;
+export declare function decorClsHasMeth(cls: any, name: string): boolean;
+export declare function decorClsNewMeth(func: any, args?: {
+    writable?: boolean;
+    enumerable?: boolean;
+    configurable?: boolean;
+}): any;
+export declare function decorClsSetMeth(cls: any, name: string, meth: any): void;
+export declare function decorClsApplyParam(decor: any, cls: any, name: string, indx: number): void;
+export declare function decorClsApplyMeth(decor: any, cls: any, name: string, meth: any): any;
+export declare function decorClsApplyClass(decor: any, cls: any): any;

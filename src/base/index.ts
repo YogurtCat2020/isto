@@ -4,7 +4,10 @@ import sym from './sym'
 import init from './init'
 import str from './str'
 import arr from './arr'
-import decor, {decorator} from './decor'
+import decor, {decorator,
+  decorClsHasMeth, decorClsNewMeth, decorClsSetMeth,
+  decorClsApplyParam, decorClsApplyMeth, decorClsApplyClass
+} from './decor'
 import print from './print'
 import err from './err'
 import {
@@ -19,6 +22,8 @@ export {
   is, to, sym, init,
   str, arr,
   decor, decorator,
+  decorClsHasMeth, decorClsNewMeth, decorClsSetMeth,
+  decorClsApplyParam, decorClsApplyMeth, decorClsApplyClass,
   print,
   err,
   has, funcHas, objHas,

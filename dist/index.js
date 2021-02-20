@@ -166,6 +166,7 @@ exports.default = new (class {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.decorClsApplyClass = exports.decorClsApplyMeth = exports.decorClsApplyParam = exports.decorClsSetMeth = exports.decorClsNewMeth = exports.decorClsHasMeth = void 0;
 const is_1 = __webpack_require__(/*! ./is */ "./src/base/is.ts");
 exports.default = new (class {
     constructor() {
@@ -196,37 +197,49 @@ exports.default = new (class {
         })();
         this.cls = new (class {
             constructor() {
-                this.hasMeth = (cls, name) => {
-                    return cls.prototype.hasOwnProperty(name);
-                };
-                this.newMeth = (func, args) => {
-                    let { writable, enumerable, configurable } = args || {};
-                    writable = writable || true;
-                    enumerable = enumerable || false;
-                    configurable = configurable || true;
-                    return {
-                        value: func,
-                        writable,
-                        enumerable,
-                        configurable
-                    };
-                };
-                this.setMeth = (cls, name, meth) => {
-                    Object.defineProperty(cls.prototype, name, meth);
-                };
-                this.applyParam = (decor, cls, name, indx) => {
-                    decor(cls.prototype, name, indx);
-                };
-                this.applyMeth = (decor, cls, name, meth) => {
-                    return decor(cls.prototype, name, meth) || meth;
-                };
-                this.applyClass = (decor, cls) => {
-                    return decor(cls) || cls;
-                };
+                this.hasMeth = (cls, name) => decorClsHasMeth(cls, name);
+                this.newMeth = (func, args) => decorClsNewMeth(func, args);
+                this.setMeth = (cls, name, meth) => decorClsSetMeth(cls, name, meth);
+                this.applyParam = (decor, cls, name, indx) => decorClsApplyParam(decor, cls, name, indx);
+                this.applyMeth = (decor, cls, name, meth) => decorClsApplyMeth(decor, cls, name, meth);
+                this.applyClass = (decor, cls) => decorClsApplyClass(decor, cls);
             }
         })();
     }
 })();
+function decorClsHasMeth(cls, name) {
+    return cls.prototype.hasOwnProperty(name);
+}
+exports.decorClsHasMeth = decorClsHasMeth;
+function decorClsNewMeth(func, args) {
+    let { writable, enumerable, configurable } = args || {};
+    writable = writable || true;
+    enumerable = enumerable || false;
+    configurable = configurable || true;
+    return {
+        value: func,
+        writable,
+        enumerable,
+        configurable
+    };
+}
+exports.decorClsNewMeth = decorClsNewMeth;
+function decorClsSetMeth(cls, name, meth) {
+    Object.defineProperty(cls.prototype, name, meth);
+}
+exports.decorClsSetMeth = decorClsSetMeth;
+function decorClsApplyParam(decor, cls, name, indx) {
+    decor(cls.prototype, name, indx);
+}
+exports.decorClsApplyParam = decorClsApplyParam;
+function decorClsApplyMeth(decor, cls, name, meth) {
+    return decor(cls.prototype, name, meth) || meth;
+}
+exports.decorClsApplyMeth = decorClsApplyMeth;
+function decorClsApplyClass(decor, cls) {
+    return decor(cls) || cls;
+}
+exports.decorClsApplyClass = decorClsApplyClass;
 
 
 /***/ }),
@@ -258,7 +271,7 @@ exports.default = new (class {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.assert = exports.sugar = exports.line = exports.split = exports.join = exports.map = exports.objHas = exports.funcHas = exports.has = exports.err = exports.print = exports.decor = exports.arr = exports.str = exports.init = exports.sym = exports.to = exports.is = void 0;
+exports.assert = exports.sugar = exports.line = exports.split = exports.join = exports.map = exports.objHas = exports.funcHas = exports.has = exports.err = exports.print = exports.decorClsApplyClass = exports.decorClsApplyMeth = exports.decorClsApplyParam = exports.decorClsSetMeth = exports.decorClsNewMeth = exports.decorClsHasMeth = exports.decor = exports.arr = exports.str = exports.init = exports.sym = exports.to = exports.is = void 0;
 const is_1 = __webpack_require__(/*! ./is */ "./src/base/is.ts");
 exports.is = is_1.default;
 const to_1 = __webpack_require__(/*! ./to */ "./src/base/to.ts");
@@ -273,6 +286,12 @@ const arr_1 = __webpack_require__(/*! ./arr */ "./src/base/arr.ts");
 exports.arr = arr_1.default;
 const decor_1 = __webpack_require__(/*! ./decor */ "./src/base/decor.ts");
 exports.decor = decor_1.default;
+Object.defineProperty(exports, "decorClsHasMeth", ({ enumerable: true, get: function () { return decor_1.decorClsHasMeth; } }));
+Object.defineProperty(exports, "decorClsNewMeth", ({ enumerable: true, get: function () { return decor_1.decorClsNewMeth; } }));
+Object.defineProperty(exports, "decorClsSetMeth", ({ enumerable: true, get: function () { return decor_1.decorClsSetMeth; } }));
+Object.defineProperty(exports, "decorClsApplyParam", ({ enumerable: true, get: function () { return decor_1.decorClsApplyParam; } }));
+Object.defineProperty(exports, "decorClsApplyMeth", ({ enumerable: true, get: function () { return decor_1.decorClsApplyMeth; } }));
+Object.defineProperty(exports, "decorClsApplyClass", ({ enumerable: true, get: function () { return decor_1.decorClsApplyClass; } }));
 const print_1 = __webpack_require__(/*! ./print */ "./src/base/print.ts");
 exports.print = print_1.default;
 const err_1 = __webpack_require__(/*! ./err */ "./src/base/err.ts");
@@ -1581,6 +1600,12 @@ const init = base.init;
 const str = base.str;
 const arr = base.arr;
 const decor = base.decor;
+const decorClsHasMeth = base.decorClsHasMeth;
+const decorClsNewMeth = base.decorClsNewMeth;
+const decorClsSetMeth = base.decorClsSetMeth;
+const decorClsApplyParam = base.decorClsApplyParam;
+const decorClsApplyMeth = base.decorClsApplyMeth;
+const decorClsApplyClass = base.decorClsApplyClass;
 const print = base.print;
 const err = base.err;
 const has = base.has;
@@ -1635,7 +1660,7 @@ exports.default = default_1;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.evaluate = exports.Decor = exports.CodeDict = exports.CodeList = exports.CodeMap = exports.CodeSet = exports.CodeArr = exports.CodeObj = exports.CodeContainer = exports.CodeVar = exports.CodeBracketCurly = exports.CodeBracketSquare = exports.CodeBracketRound = exports.CodeBracket = exports.CodeClosure = exports.Code = exports.Mass = exports.Dict = exports.List = exports.Container = exports.assert = exports.sugar = exports.line = exports.split = exports.join = exports.map = exports.objHas = exports.funcHas = exports.has = exports.err = exports.print = exports.decor = exports.arr = exports.str = exports.init = exports.sym = exports.to = exports.is = void 0;
+exports.evaluate = exports.Decor = exports.CodeDict = exports.CodeList = exports.CodeMap = exports.CodeSet = exports.CodeArr = exports.CodeObj = exports.CodeContainer = exports.CodeVar = exports.CodeBracketCurly = exports.CodeBracketSquare = exports.CodeBracketRound = exports.CodeBracket = exports.CodeClosure = exports.Code = exports.Mass = exports.Dict = exports.List = exports.Container = exports.assert = exports.sugar = exports.line = exports.split = exports.join = exports.map = exports.objHas = exports.funcHas = exports.has = exports.err = exports.print = exports.decorClsApplyClass = exports.decorClsApplyMeth = exports.decorClsApplyParam = exports.decorClsSetMeth = exports.decorClsNewMeth = exports.decorClsHasMeth = exports.decor = exports.arr = exports.str = exports.init = exports.sym = exports.to = exports.is = void 0;
 const base_1 = __webpack_require__(/*! ./base */ "./src/base/index.ts");
 Object.defineProperty(exports, "is", ({ enumerable: true, get: function () { return base_1.is; } }));
 Object.defineProperty(exports, "to", ({ enumerable: true, get: function () { return base_1.to; } }));
@@ -1644,6 +1669,12 @@ Object.defineProperty(exports, "init", ({ enumerable: true, get: function () { r
 Object.defineProperty(exports, "str", ({ enumerable: true, get: function () { return base_1.str; } }));
 Object.defineProperty(exports, "arr", ({ enumerable: true, get: function () { return base_1.arr; } }));
 Object.defineProperty(exports, "decor", ({ enumerable: true, get: function () { return base_1.decor; } }));
+Object.defineProperty(exports, "decorClsHasMeth", ({ enumerable: true, get: function () { return base_1.decorClsHasMeth; } }));
+Object.defineProperty(exports, "decorClsNewMeth", ({ enumerable: true, get: function () { return base_1.decorClsNewMeth; } }));
+Object.defineProperty(exports, "decorClsSetMeth", ({ enumerable: true, get: function () { return base_1.decorClsSetMeth; } }));
+Object.defineProperty(exports, "decorClsApplyParam", ({ enumerable: true, get: function () { return base_1.decorClsApplyParam; } }));
+Object.defineProperty(exports, "decorClsApplyMeth", ({ enumerable: true, get: function () { return base_1.decorClsApplyMeth; } }));
+Object.defineProperty(exports, "decorClsApplyClass", ({ enumerable: true, get: function () { return base_1.decorClsApplyClass; } }));
 Object.defineProperty(exports, "print", ({ enumerable: true, get: function () { return base_1.print; } }));
 Object.defineProperty(exports, "err", ({ enumerable: true, get: function () { return base_1.err; } }));
 Object.defineProperty(exports, "has", ({ enumerable: true, get: function () { return base_1.has; } }));

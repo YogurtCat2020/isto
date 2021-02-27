@@ -38,7 +38,7 @@ export default abstract class Container<K, V> {
     return this.iter
   }
 
-  public get obj(): object {
+  public get obj(): any {
     return to.obj(this.container)
   }
   public str(...args: any[]): string {

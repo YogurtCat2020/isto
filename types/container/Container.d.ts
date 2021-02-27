@@ -3,7 +3,7 @@ export default abstract class Container<K, V> {
     protected constructor(container?: any);
     toString(): string;
     [Symbol.iterator](): Generator<any>;
-    get obj(): object;
+    get obj(): any;
     str(...args: any[]): string;
     get bool(): boolean;
     get size(): number;

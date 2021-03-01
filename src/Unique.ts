@@ -1,13 +1,11 @@
 import {is, assert} from './base'
 
 
-export type subKey = () => string
-
 export default class Unique {
   private readonly key2subKeys: {[key: string]: Set<string>}
-  private readonly subKey: subKey
+  private readonly subKey: () => string
 
-  public constructor(subKey: subKey) {
+  public constructor(subKey: () => string) {
     this.key2subKeys = {}
     this.subKey = subKey
   }

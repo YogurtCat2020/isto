@@ -132,6 +132,44 @@ const decorNull = new DecorNull();
 
 /***/ }),
 
+/***/ "./src/Unique.ts":
+/*!***********************!*\
+  !*** ./src/Unique.ts ***!
+  \***********************/
+/***/ ((__unused_webpack_module, exports, __webpack_require__) => {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const base_1 = __webpack_require__(/*! ./base */ "./src/base/index.ts");
+class Unique {
+    constructor(subKey) {
+        this.key2subKeys = {};
+        this.subKey = subKey;
+    }
+    put(key) {
+        if (base_1.is.un(this.key2subKeys[key]))
+            this.key2subKeys[key] = new Set();
+        const subKeys = this.key2subKeys[key];
+        let subKey;
+        while (true) {
+            subKey = this.subKey();
+            if (!subKeys.has(subKey)) {
+                subKeys.add(subKey);
+                break;
+            }
+        }
+        return subKey;
+    }
+    pick(key, subKey) {
+        base_1.assert(!base_1.is.un(this.key2subKeys[key]), `key=${key} 不存在！`);
+        this.key2subKeys[key].delete(subKey);
+    }
+}
+exports.default = Unique;
+
+
+/***/ }),
+
 /***/ "./src/base/arr.ts":
 /*!*************************!*\
   !*** ./src/base/arr.ts ***!
@@ -271,7 +309,7 @@ exports.default = new (class {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.assert = exports.sugar = exports.line = exports.split = exports.join = exports.map = exports.objHas = exports.funcHas = exports.has = exports.err = exports.print = exports.decorClsApplyClass = exports.decorClsApplyMeth = exports.decorClsApplyParam = exports.decorClsSetMeth = exports.decorClsNewMeth = exports.decorClsHasMeth = exports.decor = exports.arr = exports.str = exports.init = exports.sym = exports.to = exports.is = void 0;
+exports.assert = exports.promisify = exports.sugar = exports.line = exports.split = exports.join = exports.map = exports.objHas = exports.funcHas = exports.has = exports.err = exports.print = exports.decorClsApplyClass = exports.decorClsApplyMeth = exports.decorClsApplyParam = exports.decorClsSetMeth = exports.decorClsNewMeth = exports.decorClsHasMeth = exports.decor = exports.arr = exports.str = exports.init = exports.sym = exports.to = exports.is = void 0;
 const is_1 = __webpack_require__(/*! ./is */ "./src/base/is.ts");
 exports.is = is_1.default;
 const to_1 = __webpack_require__(/*! ./to */ "./src/base/to.ts");
@@ -305,6 +343,7 @@ Object.defineProperty(exports, "join", ({ enumerable: true, get: function () { r
 Object.defineProperty(exports, "split", ({ enumerable: true, get: function () { return util_1.split; } }));
 Object.defineProperty(exports, "line", ({ enumerable: true, get: function () { return util_1.line; } }));
 Object.defineProperty(exports, "sugar", ({ enumerable: true, get: function () { return util_1.sugar; } }));
+Object.defineProperty(exports, "promisify", ({ enumerable: true, get: function () { return util_1.promisify; } }));
 Object.defineProperty(exports, "assert", ({ enumerable: true, get: function () { return util_1.assert; } }));
 
 
@@ -724,7 +763,7 @@ exports.default = new (class {
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.assert = exports.sugar = exports.line = exports.split = exports.join = exports.map = exports.objHas = exports.funcHas = exports.has = void 0;
+exports.assert = exports.promisify = exports.sugar = exports.line = exports.split = exports.join = exports.map = exports.objHas = exports.funcHas = exports.has = void 0;
 const is_1 = __webpack_require__(/*! ./is */ "./src/base/is.ts");
 const to_1 = __webpack_require__(/*! ./to */ "./src/base/to.ts");
 const err_1 = __webpack_require__(/*! ./err */ "./src/base/err.ts");
@@ -801,6 +840,19 @@ function sugar(args, keys) {
     return args;
 }
 exports.sugar = sugar;
+function promisify(func) {
+    return (...args) => {
+        return new Promise((resolve, reject) => {
+            func(...args, (err, ret) => {
+                if (is_1.default.un(err))
+                    resolve(ret);
+                else
+                    reject(err);
+            });
+        });
+    };
+}
+exports.promisify = promisify;
 function assert(cdt, msg) {
     if (!cdt) {
         if (is_1.default.un(msg))
@@ -1593,6 +1645,7 @@ const base = __webpack_require__(/*! ./base */ "./src/base/index.ts");
 const container = __webpack_require__(/*! ./container */ "./src/container/index.ts");
 const code = __webpack_require__(/*! ./code */ "./src/code/index.ts");
 const Decor_1 = __webpack_require__(/*! ./Decor */ "./src/Decor.ts");
+const Unique_1 = __webpack_require__(/*! ./Unique */ "./src/Unique.ts");
 const is = base.is;
 const to = base.to;
 const sym = base.sym;
@@ -1616,6 +1669,7 @@ const join = base.join;
 const split = base.split;
 const line = base.line;
 const sugar = base.sugar;
+const promisify = base.promisify;
 const assert = base.assert;
 const Container = container.Container;
 const List = container.List;
@@ -1636,6 +1690,7 @@ const CodeMap = code.CodeMap;
 const CodeList = code.CodeList;
 const CodeDict = code.CodeDict;
 const Decor = Decor_1.default;
+const Unique = Unique_1.default;
 function default_1(code, context, contextName) {
     code = Code.new(code).$;
     if (is.un(context))
@@ -1660,7 +1715,7 @@ exports.default = default_1;
 
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.evaluate = exports.Decor = exports.CodeDict = exports.CodeList = exports.CodeMap = exports.CodeSet = exports.CodeArr = exports.CodeObj = exports.CodeContainer = exports.CodeVar = exports.CodeBracketCurly = exports.CodeBracketSquare = exports.CodeBracketRound = exports.CodeBracket = exports.CodeClosure = exports.Code = exports.Mass = exports.Dict = exports.List = exports.Container = exports.assert = exports.sugar = exports.line = exports.split = exports.join = exports.map = exports.objHas = exports.funcHas = exports.has = exports.err = exports.print = exports.decorClsApplyClass = exports.decorClsApplyMeth = exports.decorClsApplyParam = exports.decorClsSetMeth = exports.decorClsNewMeth = exports.decorClsHasMeth = exports.decor = exports.arr = exports.str = exports.init = exports.sym = exports.to = exports.is = void 0;
+exports.evaluate = exports.Unique = exports.Decor = exports.CodeDict = exports.CodeList = exports.CodeMap = exports.CodeSet = exports.CodeArr = exports.CodeObj = exports.CodeContainer = exports.CodeVar = exports.CodeBracketCurly = exports.CodeBracketSquare = exports.CodeBracketRound = exports.CodeBracket = exports.CodeClosure = exports.Code = exports.Mass = exports.Dict = exports.List = exports.Container = exports.assert = exports.promisify = exports.sugar = exports.line = exports.split = exports.join = exports.map = exports.objHas = exports.funcHas = exports.has = exports.err = exports.print = exports.decorClsApplyClass = exports.decorClsApplyMeth = exports.decorClsApplyParam = exports.decorClsSetMeth = exports.decorClsNewMeth = exports.decorClsHasMeth = exports.decor = exports.arr = exports.str = exports.init = exports.sym = exports.to = exports.is = void 0;
 const base_1 = __webpack_require__(/*! ./base */ "./src/base/index.ts");
 Object.defineProperty(exports, "is", ({ enumerable: true, get: function () { return base_1.is; } }));
 Object.defineProperty(exports, "to", ({ enumerable: true, get: function () { return base_1.to; } }));
@@ -1685,6 +1740,7 @@ Object.defineProperty(exports, "join", ({ enumerable: true, get: function () { r
 Object.defineProperty(exports, "split", ({ enumerable: true, get: function () { return base_1.split; } }));
 Object.defineProperty(exports, "line", ({ enumerable: true, get: function () { return base_1.line; } }));
 Object.defineProperty(exports, "sugar", ({ enumerable: true, get: function () { return base_1.sugar; } }));
+Object.defineProperty(exports, "promisify", ({ enumerable: true, get: function () { return base_1.promisify; } }));
 Object.defineProperty(exports, "assert", ({ enumerable: true, get: function () { return base_1.assert; } }));
 const container_1 = __webpack_require__(/*! ./container */ "./src/container/index.ts");
 Object.defineProperty(exports, "Container", ({ enumerable: true, get: function () { return container_1.Container; } }));
@@ -1708,6 +1764,8 @@ Object.defineProperty(exports, "CodeList", ({ enumerable: true, get: function ()
 Object.defineProperty(exports, "CodeDict", ({ enumerable: true, get: function () { return code_1.CodeDict; } }));
 const Decor_1 = __webpack_require__(/*! ./Decor */ "./src/Decor.ts");
 exports.Decor = Decor_1.default;
+const Unique_1 = __webpack_require__(/*! ./Unique */ "./src/Unique.ts");
+exports.Unique = Unique_1.default;
 const evaluate_1 = __webpack_require__(/*! ./evaluate */ "./src/evaluate.ts");
 exports.evaluate = evaluate_1.default;
 

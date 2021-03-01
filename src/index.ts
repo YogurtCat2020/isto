@@ -9,6 +9,7 @@ import {
   has, funcHas, objHas,
   map, join, split, line,
   sugar,
+  promisify,
   assert
 } from './base'
 import {
@@ -28,6 +29,7 @@ import {
   CodeList, CodeDict
 } from './code'
 import Decor from './Decor'
+import Unique from './Unique'
 import evaluate from './evaluate'
 
 
@@ -42,6 +44,7 @@ export {
   has, funcHas, objHas,
   map, join, split, line,
   sugar,
+  promisify,
   assert,
 
   Container,
@@ -59,5 +62,6 @@ export {
   CodeList, CodeDict,
 
   Decor,
+  Unique,
   evaluate
 }

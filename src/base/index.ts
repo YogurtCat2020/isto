@@ -14,6 +14,7 @@ import {
   has, funcHas, objHas,
   map, join, split, line,
   sugar,
+  promisify,
   assert
 } from './util'
 
@@ -29,5 +30,6 @@ export {
   has, funcHas, objHas,
   map, join, split, line,
   sugar,
+  promisify,
   assert
 }

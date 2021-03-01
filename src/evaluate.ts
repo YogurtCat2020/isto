@@ -2,6 +2,7 @@ import * as base from './base'
 import * as container from './container'
 import * as code from './code'
 import _Decor from './Decor'
+import _Unique from './Unique'
 
 
 const is = base.is
@@ -27,6 +28,7 @@ const join = base.join
 const split = base.split
 const line = base.line
 const sugar = base.sugar
+const promisify = base.promisify
 const assert = base.assert
 
 const Container = container.Container
@@ -50,6 +52,7 @@ const CodeList = code.CodeList
 const CodeDict = code.CodeDict
 
 const Decor = _Decor
+const Unique = _Unique
 
 
 export default function(code: any, context?: any, contextName?: string) {
@@ -64,33 +67,26 @@ export default function(code: any, context?: any, contextName?: string) {
 
 
 /*
-let f = (m, s) => s
+(() => {
+  const fa = (m, s) => s
   .split(/[, \n]+/)
   .filter(i => Boolean(i))
   .map(i => `const ${i} = ${m}.${i}`)
   .join('\n')
-console.log([f('base', `is, to, sym, init,
-  str, arr,
-  decor,
-  decorClsHasMeth, decorClsNewMeth, decorClsSetMeth,
-  decorClsApplyParam, decorClsApplyMeth, decorClsApplyClass,
-  print,
-  err,
-  has, funcHas, objHas,
-  map, join, split, line,
-  sugar,
-  assert`),
-  f('container', `Container,
-  List, Dict,
-  Mass`),
-  f('code', `Code,
-  CodeClosure,
-  CodeBracket,
-  CodeBracketRound, CodeBracketSquare, CodeBracketCurly,
-  CodeVar,
-  CodeContainer,
-  CodeObj, CodeArr,
-  CodeSet, CodeMap,
-  CodeList, CodeDict`),
-'const Decor = _Decor'].join('\n\n'))
+
+  const fb = (s) => s
+  .split(/[, \n]+/)
+  .filter(i => Boolean(i))
+  .map(i => `const ${i} = _${i}`)
+  .join('\n')
+
+  const r = [
+    fa('base', ``),
+    fa('container', ``),
+    fa('code', ``),
+    fb(``)
+  ].join('\n\n')
+
+  console.log(r)
+})()
 */

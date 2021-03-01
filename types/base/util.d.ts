@@ -6,4 +6,5 @@ export declare function join(arr: any, sep?: string): string;
 export declare function split(str: string): string[];
 export declare function line(str?: string, num?: number): string;
 export declare function sugar(args: object, keys: object): object;
+export declare function promisify<T>(func: Function): (...args: any[]) => Promise<T>;
 export declare function assert(cdt: boolean, msg?: string): void;

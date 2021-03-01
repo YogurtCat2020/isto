@@ -60,6 +60,17 @@ export function sugar(args: object, keys: object): object {
   return args
 }
 
+export function promisify<T>(func: Function) {
+  return (...args: any[]): Promise<T> => {
+    return new Promise((resolve, reject) => {
+      func(...args, (err, ret) => {
+        if(is.un(err)) resolve(ret)
+        else reject(err)
+      })
+    })
+  }
+}
+
 export function assert(cdt: boolean, msg?: string): void {
   if(!cdt) {
     if(is.un(msg)) err.assertionFail()

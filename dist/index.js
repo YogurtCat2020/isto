@@ -147,22 +147,24 @@ class Unique {
         this.subKey = subKey;
     }
     put(key) {
-        if (base_1.is.un(this.key2subKeys[key]))
-            this.key2subKeys[key] = new Set();
-        const subKeys = this.key2subKeys[key];
+        let subKeys = this.key2subKeys[key];
+        if (base_1.is.un(subKeys)) {
+            subKeys = new Set();
+            this.key2subKeys[key] = subKeys;
+        }
         let subKey;
         while (true) {
             subKey = this.subKey();
             if (!subKeys.has(subKey)) {
                 subKeys.add(subKey);
-                break;
+                return subKey;
             }
         }
-        return subKey;
     }
     pick(key, subKey) {
-        base_1.assert(!base_1.is.un(this.key2subKeys[key]), `key=${key} 不存在！`);
-        this.key2subKeys[key].delete(subKey);
+        const subKeys = this.key2subKeys[key];
+        base_1.assert(!base_1.is.un(subKeys), `key=${key} 不存在！`);
+        subKeys.delete(subKey);
     }
 }
 exports.default = Unique;

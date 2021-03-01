@@ -11,20 +11,24 @@ export default class Unique {
   }
 
   public put(key: string): string {
-    if(is.un(this.key2subKeys[key])) this.key2subKeys[key] = new Set<string>()
-    const subKeys = this.key2subKeys[key]
+    let subKeys = this.key2subKeys[key]
+    if(is.un(subKeys)) {
+      subKeys = new Set<string>()
+      this.key2subKeys[key] = subKeys
+    }
+
     let subKey: string
     while(true) {
       subKey = this.subKey()
       if(!subKeys.has(subKey)) {
         subKeys.add(subKey)
-        break
+        return subKey
       }
     }
-    return subKey
   }
   public pick(key: string, subKey: string): void {
-    assert(!is.un(this.key2subKeys[key]), `key=${key} 不存在！`)
-    this.key2subKeys[key].delete(subKey)
+    const subKeys = this.key2subKeys[key]
+    assert(!is.un(subKeys), `key=${key} 不存在！`)
+    subKeys.delete(subKey)
   }
 }

@@ -28,6 +28,11 @@ export default abstract class Decor {
     return err.notImplemented()
   }
 
+  public up(...args: any[]): Decor {
+    err.notImplemented()
+    return this
+  }
+
   public static decor(name: string): any {
     return (cls: any): any => {
       const func = function(...args: any[]): any {
@@ -115,8 +120,9 @@ class DecorTree extends Decor {
     return x
   }
 
-  public up(...args: any[]): void {
+  public up(...args: any[]): Decor {
     if(is.un(this.decors)) this.decors = Decor.new(...args)
+    return this
   }
 }
 

@@ -57,6 +57,11 @@ export default new (class {
       }
       return q+x+q
     }
+    const symToStr = (x: symbol): string => {
+      let t = String(x).slice(7, -1)
+      if(t) t = strToStr(t)
+      return `Symbol(${t})`
+    }
     const objToStr = (x: object, n: number): string => {
       n += 1
       const ind_in = ' '.repeat(2*n)
@@ -70,6 +75,7 @@ export default new (class {
     }
     const toStr = (x: any, n: number): string => {
       if(is.str(x)) return strToStr(x)
+      if(is.sym(x)) return symToStr(x)
       if(is.obj(x)) return objToStr(x, n)
       return String(x)
     }
@@ -103,7 +109,7 @@ export default new (class {
     }
     return null
   }
-  public readonly has = (x: any, i:any): boolean => {
+  public readonly has = (x: any, i: any): boolean => {
     if(objHas(x, sym.has)) return x[sym.has](i)
     if(is.str(x)) {
       if(is.str(i)) return x.indexOf(i) >= 0
@@ -113,7 +119,7 @@ export default new (class {
     if(is.set(x)) return x.has(i)
     if(is.map(x)) return !is.un(x.get(i))
     if(is.obj(x)) return i in x
-    return false
+    return null
   }
 
   public readonly iter = (x?: any): Generator<any> => {

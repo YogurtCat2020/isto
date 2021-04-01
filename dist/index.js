@@ -50,6 +50,10 @@ class Decor {
     $(x) {
         return base_1.err.notImplemented();
     }
+    up(...args) {
+        base_1.err.notImplemented();
+        return this;
+    }
     static decor(name) {
         return (cls) => {
             const func = function (...args) {
@@ -125,6 +129,7 @@ class DecorTree extends Decor {
     up(...args) {
         if (base_1.is.un(this.decors))
             this.decors = Decor.new(...args);
+        return this;
     }
 }
 const decorNull = new DecorNull();
@@ -619,6 +624,12 @@ exports.default = new (class {
                 }
                 return q + x + q;
             };
+            const symToStr = (x) => {
+                let t = String(x).slice(7, -1);
+                if (t)
+                    t = strToStr(t);
+                return `Symbol(${t})`;
+            };
             const objToStr = (x, n) => {
                 n += 1;
                 const ind_in = ' '.repeat(2 * n);
@@ -634,6 +645,8 @@ exports.default = new (class {
             const toStr = (x, n) => {
                 if (is_1.default.str(x))
                     return strToStr(x);
+                if (is_1.default.sym(x))
+                    return symToStr(x);
                 if (is_1.default.obj(x))
                     return objToStr(x, n);
                 return String(x);
@@ -694,7 +707,7 @@ exports.default = new (class {
                 return !is_1.default.un(x.get(i));
             if (is_1.default.obj(x))
                 return i in x;
-            return false;
+            return null;
         };
         this.iter = (x) => {
             if (util_1.objHas(x, sym_1.default.iter))

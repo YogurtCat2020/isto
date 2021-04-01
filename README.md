@@ -419,7 +419,7 @@ Code.new({
 ```
 
 `Code.extension` 是一个 `Dict` 对象，可以定义扩展，
-其中 键 是 扩展名，值是一个函数：`x => Code`，
+其中 键 是 扩展名，值 是一个函数：`x => Code`，
 传入 `Object` 对象，返回 `Code` 对象。
 
 `Object` 对象中用 `X（extension）` 键 指定扩展名，可以调用扩展。

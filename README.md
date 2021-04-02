@@ -8,6 +8,7 @@
 - 容器
 - Decor
 - Code
+- evaluate
 
 
 
@@ -216,7 +217,8 @@ import {sym} from '@yogurtcat/lib'
 
 容器主要包括 `List`、`Dict` 和 `Mass`。
 
-`Container<K, V>` 是它们的父类，里面定义了公共的方法
+`Container<K, V>` 是它们的父类，
+里面定义了一些公共的方法。
 
 ```TypeScript
 import {Container} from '@yogurtcat/lib'
@@ -258,7 +260,8 @@ Container.merge(args)  // 合并 args
 Container.decor(...args)  // 应用 args 中的装饰器
 ```
 
-`List<T>` 继承了 `Container<number, T>`，是对 `Array` 的二次封装
+`List<T>` 继承了 `Container<number, T>`，
+是对 `Array` 的二次封装。
 
 ```TypeScript
 import {List} from '@yogurtcat/lib'
@@ -278,7 +281,8 @@ list.merge({
   })  // list: [-999, 11, 0, 1, 2, 3, 233]
 ```
 
-`Dict<K, V>` 继承了 `Container<K, V>`，是对 `Map` 的二次封装
+`Dict<K, V>` 继承了 `Container<K, V>`，
+是对 `Map` 的二次封装。
 
 ```TypeScript
 import {Dict} from '@yogurtcat/lib'
@@ -306,8 +310,9 @@ dict.merge({
 当执行 `List` 或 `Dict` 特征的操作后，
 就会坍缩成对应类型，坍缩后不可再修改类型，
 `Mass` 中设置的 值，如果是 类容器对象
-  （`Object`、`Array`、`Set`、`Map`、`List`、`Dict`、`Mass`），
-  就会自动初始化成 `Mass`
+  （`Object`、`Array`、`Set`、`Map`、
+  `List`、`Dict`、`Mass`），
+  就会自动初始化成 `Mass`。
 
 ```TypeScript
 import {Mass} from '@yogurtcat/lib'
@@ -339,7 +344,7 @@ mass.merge({
 
 `Container.decor` 方法中传入的参数，
   可以是一般的函数：`(x: any) => any`，
-  也可以是 `Decor` 对象
+  也可以是 `Decor` 对象。
 
 ```TypeScript
 import {Mass, Decor} from '@yogurtcat/lib'
@@ -377,8 +382,10 @@ Mass.new().decor(
 
 ### **Code**
 
-`Code` 定义了 Code 语法，Code 语法 允许用 容器 来描述 JS 代码，
-`Code` 可以将 符合 Code 语法 的 容器 转换成 JS 代码。
+`Code` 定义了 Code 语法，
+Code 语法 允许用 容器 来描述 JS 代码。
+`Code` 类 可以将 符合 Code 语法 的 容器 
+转换成 JS 代码 的 字符串。
 
 ```TypeScript
 import {Code} from '@yogurtcat/lib'
@@ -418,11 +425,12 @@ Code.new({
 === `() => {console.log('hello')}`
 ```
 
-`Code.extension` 是一个 `Dict` 对象，可以定义扩展，
+`Code.extension` 是一个 `Dict` 对象，可以定义扩展。
 其中 键 是 扩展名，值 是一个函数：`x => Code`，
 传入 `Object` 对象，返回 `Code` 对象。
 
-`Object` 对象中用 `X（extension）` 键 指定扩展名，可以调用扩展。
+`Object` 对象中用 `X（extension）` 键 指定扩展名，
+指定后调用相应扩展。
 
 默认提供了以下扩展
 
@@ -577,4 +585,77 @@ Code.new({
 }).$
 === `new Dict({a: 666,
 b: 'hello'})`
+```
+
+### **evaluate**
+
+`evaluate` 函数 可以直接将 符合 Code 语法 的 容器 
+转换成 JS 代码。
+
+```TypeScript
+import {evaluate} from '@yogurtcat/lib'
+
+const codes = {
+    X: '()',
+    C: {
+      X: 'O',
+      I: {
+        x: `'100px'`,
+        y: `'200px'`
+      }
+    }
+  }
+
+// {x: '100px', y: '200px'}
+evaluate(codes)
+```
+
+可以通过定义 上下文 来传递变量，
+通过 变量名 C 来访问 上下文。
+
+```TypeScript
+import {evaluate} from '@yogurtcat/lib'
+
+const codes = {
+    X: '()',
+    C: {
+      X: 'O',
+      I: {
+        x: `C.x + 'px'`,
+        y: `C.y + 'px'`
+      }
+    }
+  }
+const context = {
+  x: 100,
+  y: 200
+}
+
+// {x: '100px', y: '200px'}
+evaluate(codes, context)
+```
+
+可以通过 `contextName` 参数 修改 变量名。
+
+```TypeScript
+import {evaluate} from '@yogurtcat/lib'
+
+const codes = {
+    X: '()',
+    C: {
+      X: 'O',
+      I: {
+        x: `CONTEXT.x + 'px'`,
+        y: `CONTEXT.y + 'px'`
+      }
+    }
+  }
+const context = {
+  x: 100,
+  y: 200
+}
+const contextName = 'CONTEXT'
+
+// {x: '100px', y: '200px'}
+evaluate(codes, context, contextName)
 ```

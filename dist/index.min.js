@@ -1,5 +1,5 @@
 /*!
- * @yogurtcat/lib.js v1.1.0
+ * @yogurtcat/lib.js
  * (c) 2020- YogurtCat
  * git: https://github.com/YogurtCat2020/lib
  * Released under the MIT License.
